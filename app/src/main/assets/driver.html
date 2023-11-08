@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Driver Dashboard</title>
+    <style>
+        body {
+            background-color: #011627;
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+        h1 {
+            text-align: center;
+            color: #FFF;
+        }
+        table {
+            width: 80%;
+            max-width: 100%;
+            margin: 0 auto;
+            border-collapse: collapse;
+            background-color: darkblue;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #83b9d6;
+        }
+        tr:nth-child(even) {
+            background-color: #25537c;
+        }
+        tr:nth-child(odd) {
+            background-color: #6670b9;
+        }
+        .accept-button, .decline-button {
+            padding: 5px 10px;
+            background-color: #487249;
+            color: #000000;
+            border: none;
+            cursor: pointer;
+        }
+        .decline-button {
+            background-color: #552723;
+        }
+
+        @media (max-width: 600px) {
+            table {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Driver Dashboard</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Request ID</th>
+                <th>Passenger Name</th>
+                <th>Location</th>
+                <th>Destination</th> 
+                <th>Time</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>Omar Alsayed</td>
+                <td>Al-Abbasia Square</td>
+                <td>Gate 3</td> 
+                <td>07:30 AM</td>
+                <td>
+                    <button class="accept-button">Accept</button>
+                    <button class="decline-button">Decline</button>
+                </td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>Mohamed Ali</td>
+                <td>Gate 4</td>
+                <td>Abdu-basha square</td> 
+                <td>11:30 AM</td>
+                <td>
+                    <button class="accept-button">Accept</button>
+                    <button class="decline-button">Decline</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>
