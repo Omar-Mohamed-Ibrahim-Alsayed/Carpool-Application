@@ -17,7 +17,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.bottomnavigation.BottomNavigationView.OnNavigationItemSelectedListener;
 
 
-public class MainActivity extends AppCompatActivity implements OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity{
 
     BottomNavigationView bottomNavigationView;
     FragmentManager fragmentManager = getSupportFragmentManager();
@@ -41,31 +41,29 @@ public class MainActivity extends AppCompatActivity implements OnNavigationItemS
             bottomNavigationView
                     = findViewById(R.id.bottomNavigationView);
 
-            bottomNavigationView
-                    .setOnNavigationItemSelectedListener(this);
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
 
-            bottomNavigationView.setSelectedItemId(R.id.profile);
+            if (itemId == R.id.book) {
+                getSupportFragmentManager().beginTransaction().replace(R.id.flFragment, routs).commit();
+                return true;
+            } else if (itemId == R.id.cart) {
+                getSupportFragmentManager().beginTransaction().replace(R.id.flFragment, cart).commit();
+                return true;
+            } else if (itemId == R.id.profile) {
+                getSupportFragmentManager().beginTransaction().replace(R.id.flFragment, signin).commit();
+                return true;
+            } else if (itemId == R.id.history) {
+                getSupportFragmentManager().beginTransaction().replace(R.id.flFragment, history).commit();
+                return true;
+            }
+
+            return false;
+        });
+
+
+        bottomNavigationView.setSelectedItemId(R.id.profile);
     }
 
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        int itemId = item.getItemId();
-
-        if (itemId == R.id.book) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.flFragment, routs).commit();
-            return true;
-        } else if (itemId == R.id.cart) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.flFragment, cart).commit();
-            return true;
-        } else if (itemId == R.id.profile) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.flFragment, signin).commit();
-            return true;
-        } else if (itemId == R.id.history) {
-        getSupportFragmentManager().beginTransaction().replace(R.id.flFragment, history).commit();
-        return true;
-    }
-
-        return false;
-    }
 
 }

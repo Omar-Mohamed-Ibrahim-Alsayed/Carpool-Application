@@ -22,21 +22,24 @@ public class SignIn extends Fragment  {
     TextView signUpLink;
     SignUp su;
     FragmentManager parentFragmentManager;
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_sign_in, container, false);
-        signUpLink = (TextView) view.findViewById(R.id.signUpLink);
-        su = new SignUp();
-        parentFragmentManager = getParentFragmentManager();
-        signUpLink.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                parentFragmentManager.beginTransaction().replace(R.id.flFragment, su).commit();
-                signUpLink.setText('H');
-            }
-        });
-        return inflater.inflate(R.layout.fragment_sign_in, container, false);
+
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+            View view = inflater.inflate(R.layout.fragment_sign_in, container, false);
+            signUpLink = view.findViewById(R.id.signUpLink);
+            su = new SignUp();
+            parentFragmentManager = getParentFragmentManager();
+
+            signUpLink.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    parentFragmentManager.beginTransaction().replace(R.id.flFragment, su).addToBackStack(null).commit();
+                }
+            });
+
+            return view; // Return the inflated view instead of re-inflating the layout
+        }
     }
 
-}
+
