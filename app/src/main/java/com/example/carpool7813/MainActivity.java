@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity{
                 getSupportFragmentManager().beginTransaction().replace(R.id.flFragment, cart).commit();
                 return true;
             } else if (itemId == R.id.profile) {
-                getSupportFragmentManager().beginTransaction().replace(R.id.flFragment, signin).commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.flFragment, driver).commit();
                 return true;
             } else if (itemId == R.id.history) {
                 getSupportFragmentManager().beginTransaction().replace(R.id.flFragment, history).commit();
