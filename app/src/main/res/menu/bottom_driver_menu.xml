@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/Routs"
+        android:title="Routs"
+        android:icon="@drawable/add_location_foreground"/>
+
+    <item
+        android:id="@+id/Requests"
+        android:title="Requests"
+        android:icon="@drawable/requests_foreground"/>
+
+    <item
+        android:id="@+id/Ratings"
+        android:title="Ratings"
+        android:icon="@drawable/rate_foreground"/>
+
+    <item
+        android:id="@+id/profile"
+        android:title="Profile"
+        android:icon="@drawable/account_foreground"/>
+</menu>

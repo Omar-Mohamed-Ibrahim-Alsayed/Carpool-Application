@@ -3,64 +3,126 @@ package com.example.carpool7813.fragments;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import com.example.carpool7813.R;
+import com.example.carpool7813.utilities.Adaptor;
+import com.example.carpool7813.utilities.Rout;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link Routs#newInstance} factory method to
- * create an instance of this fragment.
- */
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+
 public class Routs extends Fragment {
+    RecyclerView recycler;
+    boolean isGrid = true;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    Adaptor routsAdapter;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    public Routs() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment Routs.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static Routs newInstance(String param1, String param2) {
-        Routs fragment = new Routs();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_routs, container, false);
+        View view = inflater.inflate(R.layout.fragment_routs, container, false);
+
+        recycler = view.findViewById(R.id.rview);
+
+        setLayoutManager(isGrid);
+
+        Button toggleButton = view.findViewById(R.id.toggleButton);
+
+        List<Rout> routs = new ArrayList<>();
+
+        // Retrieve data and set the adapter in ValueEventListener
+        getRouts(routs);
+
+        toggleButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleView();
+            }
+        });
+
+        return view;
+    }
+
+    private void setLayoutManager(boolean isGrid) {
+        RecyclerView.LayoutManager layoutManager;
+        if (isGrid) {
+            layoutManager = new GridLayoutManager(getContext(), 2);
+        } else {
+            layoutManager = new GridLayoutManager(getContext(), 1);
+        }
+        recycler.setLayoutManager(layoutManager);
+    }
+
+    private void toggleView() {
+        isGrid = !isGrid;
+        setLayoutManager(isGrid);
+        routsAdapter.updateLayout(isGrid);
+        recycler.getAdapter().notifyDataSetChanged();
+        recycler.setAdapter(routsAdapter);
+    }
+
+    private void getRouts(List<Rout> routs){
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference ridesRef = database.getReference("rides");
+
+        ridesRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                routs.clear();
+
+                for (DataSnapshot rideSnapshot : dataSnapshot.getChildren()) {
+                    String rideID = rideSnapshot.getKey();
+                    String driver = rideSnapshot.child("driver").getValue(String.class);
+                    String clients = rideSnapshot.child("rider").getValue(String.class);
+                    String time = rideSnapshot.child("time").getValue(String.class);
+                    String start = rideSnapshot.child("start").getValue(String.class);
+                    String end = rideSnapshot.child("end").getValue(String.class);
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MMMM/yyyy-HH:mm");
+
+
+                    // Parse the string into a LocalDateTime object
+                    LocalDateTime dateTime = LocalDateTime.parse(time, formatter);
+                    List<String> clientList = Arrays.asList(clients);
+                    List<String> stopsList = Arrays.asList("empty");
+
+
+                    Rout rout = new Rout(driver, clientList, stopsList, start, end, dateTime);
+                    routs.add(rout);
+                }
+
+                // Set the adapter after data retrieval
+                routsAdapter = new Adaptor(routs, getParentFragmentManager(),isGrid);
+                recycler.setAdapter(routsAdapter);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                // Handle cancellation
+            }
+        });
     }
 }

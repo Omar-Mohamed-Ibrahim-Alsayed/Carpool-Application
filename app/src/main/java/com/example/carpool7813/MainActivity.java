@@ -1,69 +1,40 @@
 package com.example.carpool7813;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.FragmentManager;
-
+import android.content.Intent;
 import android.os.Bundle;
-import android.view.MenuItem;
-import com.example.carpool7813.fragments.Cart;
-import com.example.carpool7813.fragments.Driver;
-import com.example.carpool7813.fragments.History;
-import com.example.carpool7813.fragments.Order;
-import com.example.carpool7813.fragments.Routs;
+
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.example.carpool7813.fragments.SignIn;
-import com.example.carpool7813.fragments.SignUp;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.bottomnavigation.BottomNavigationView.OnNavigationItemSelectedListener;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
-
-public class MainActivity extends AppCompatActivity{
-
-    BottomNavigationView bottomNavigationView;
-    FragmentManager fragmentManager = getSupportFragmentManager();
-    Routs routs = new Routs();
-    SignIn signin = new SignIn();
-    SignUp signup = new SignUp();
-    History history = new History();
-    Cart cart = new Cart();
-    Driver driver = new Driver();
-
-    Order order = new Order();
+public class MainActivity extends AppCompatActivity  {
+    private FirebaseAuth mAuth;
+    SignIn si = new SignIn();
+    @Override
+    public void onStart() {
+        super.onStart();
+        mAuth = FirebaseAuth.getInstance();
+        // Check if user is signed in (non-null) and update UI accordingly.
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if(currentUser != null){
+            Intent intent = new Intent(this, CustomerApp.class);
+            startActivity(intent);
+        }
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             setContentView(R.layout.activity_main);
-//            fragmentManager.beginTransaction()
-//                    .replace(R.id.flFragment, Cart.class, null)
-//                    .setReorderingAllowed(true)
-//                    .addToBackStack("name") // Name can be null
-//                    .commit();
-            bottomNavigationView
-                    = findViewById(R.id.bottomNavigationView);
 
-        bottomNavigationView.setOnItemSelectedListener(item -> {
-            int itemId = item.getItemId();
+            FirebaseApp.initializeApp(this);
+            getSupportFragmentManager().beginTransaction().replace(R.id.flFragment, si).commit();
 
-            if (itemId == R.id.book) {
-                getSupportFragmentManager().beginTransaction().replace(R.id.flFragment, routs).commit();
-                return true;
-            } else if (itemId == R.id.cart) {
-                getSupportFragmentManager().beginTransaction().replace(R.id.flFragment, cart).commit();
-                return true;
-            } else if (itemId == R.id.profile) {
-                getSupportFragmentManager().beginTransaction().replace(R.id.flFragment, driver).commit();
-                return true;
-            } else if (itemId == R.id.history) {
-                getSupportFragmentManager().beginTransaction().replace(R.id.flFragment, history).commit();
-                return true;
-            }
-
-            return false;
-        });
-
-
-        bottomNavigationView.setSelectedItemId(R.id.profile);
     }
+
+
 
 
 }

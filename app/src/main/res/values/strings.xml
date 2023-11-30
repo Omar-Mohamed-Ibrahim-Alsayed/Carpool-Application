@@ -3,4 +3,8 @@
     <string name="signin_hello">Welcome, please sign in</string>
     <string name="signup_hello">Nice to meet you, Take your first step in our journey.</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="profile_title">It\'s nice to meet you!</string>
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="preference_file_key">current_user</string>
 </resources>
