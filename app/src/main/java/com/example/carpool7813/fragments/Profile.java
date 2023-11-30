@@ -1,6 +1,7 @@
 package com.example.carpool7813.fragments;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
@@ -15,6 +16,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.carpool7813.CustomerApp;
+import com.example.carpool7813.MainActivity;
 import com.example.carpool7813.R;
 import com.example.carpool7813.interfaces.UserCallback;
 import com.example.carpool7813.utilities.User;
@@ -77,7 +80,9 @@ public class Profile extends Fragment {
             @Override
             public void onClick(View v) {
                 FirebaseAuth.getInstance().signOut();
-                parentFragmentManager.beginTransaction().replace(R.id.flFragment, sign_in_page).addToBackStack(null).commit();
+                if (getActivity() != null) {
+                    getActivity().finish();
+                }
             }
         });
 

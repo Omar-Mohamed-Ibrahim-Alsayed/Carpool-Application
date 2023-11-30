@@ -40,14 +40,21 @@
         app:spanCount="2"
         tools:listitem="@layout/destination" />
 
-    <!-- Toggle Button or UI Element for switching between Grid and List view -->
-    <!-- Add your own UI component for toggling views -->
-    <Button
+
+    <ToggleButton
         android:id="@+id/toggleButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Toggle View"
+        android:textOn="List"
+        android:textOff="Grid"
+        android:textColor="@color/white"
+        android:background="@color/richBlack"
+        android:button="@null"
+        android:drawableStart="@drawable/toggle_selector"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
         app:layout_constraintBottom_toBottomOf="@+id/header"
-        app:layout_constraintEnd_toEndOf="@+id/header"/>
+        app:layout_constraintEnd_toEndOf="@+id/header" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
