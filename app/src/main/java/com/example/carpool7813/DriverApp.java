@@ -1,48 +1,50 @@
 package com.example.carpool7813;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.FragmentManager;
-
 import android.os.Bundle;
-
-import com.example.carpool7813.fragments.Cart;
-import com.example.carpool7813.fragments.History;
-import com.example.carpool7813.fragments.Routs;
-import com.example.carpool7813.fragments.SignIn;
-import com.example.carpool7813.fragments.SignUp;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class DriverApp extends AppCompatActivity {
     BottomNavigationView bottomNavigationView;
+    WebView webView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_driver_app);
-        bottomNavigationView
-                = findViewById(R.id.bottomNavigationView);
+
+        bottomNavigationView = findViewById(R.id.bottomNavigationView);
+        webView = findViewById(R.id.webView);
+        loadWebView("routs.html");
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
 
             if (itemId == R.id.Routs) {
-                //getSupportFragmentManager().beginTransaction().replace(R.id.flFragment, routs).commit();
+                loadWebView("routs.html");
                 return true;
             } else if (itemId == R.id.Requests) {
-                //getSupportFragmentManager().beginTransaction().replace(R.id.flFragment, cart).commit();
+                loadWebView("requests.html");
                 return true;
             } else if (itemId == R.id.profile) {
-                //getSupportFragmentManager().beginTransaction().replace(R.id.flFragment, signin).commit();
+                loadWebView("profile.html");
                 return true;
             } else if (itemId == R.id.Ratings) {
-                //getSupportFragmentManager().beginTransaction().replace(R.id.flFragment, history).commit();
+                loadWebView("rates.html");
                 return true;
             }
 
             return false;
         });
 
-
         bottomNavigationView.setSelectedItemId(R.id.profile);
+    }
+
+    private void loadWebView(String fileName) {
+        webView.setWebViewClient(new WebViewClient());
+        webView.getSettings().setJavaScriptEnabled(true);
+        webView.loadUrl("file:///android_asset/" + fileName);
     }
 }

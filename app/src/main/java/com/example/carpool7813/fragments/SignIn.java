@@ -22,6 +22,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.carpool7813.CustomerApp;
+import com.example.carpool7813.DriverApp;
+import com.example.carpool7813.MainActivity;
 import com.example.carpool7813.R;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -39,8 +41,7 @@ public class SignIn extends Fragment {
     FragmentManager parentFragmentManager;
     Button signIn_button;
     private FirebaseAuth mAuth;
-    String email;
-    String password;
+    String email,password,user_type;
     EditText email_et;
     EditText password_et;
     ProgressBar pb;
@@ -52,8 +53,15 @@ public class SignIn extends Fragment {
                 getString(R.string.preference_file_key), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
         editor.putString("Mail", user.getEmail());
+        editor.putString("Type", user.getDisplayName());
         editor.apply();
-        Intent intent = new Intent(getContext(), CustomerApp.class);
+        user_type = user.getDisplayName();
+        Intent intent;
+        if (user_type.equals("Client")) {
+            intent = new Intent(context, CustomerApp.class);
+        } else {
+            intent = new Intent(context, DriverApp.class);
+        }
         startActivity(intent);
     }
 

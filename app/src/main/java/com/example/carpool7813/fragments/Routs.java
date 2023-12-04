@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ProgressBar;
 
 import com.example.carpool7813.R;
 import com.example.carpool7813.utilities.Adaptor;
@@ -31,8 +32,8 @@ import java.util.List;
 public class Routs extends Fragment {
     RecyclerView recycler;
     boolean isGrid = true;
-
     Adaptor routsAdapter;
+    ProgressBar pb;
 
 
     @Override
@@ -51,6 +52,8 @@ public class Routs extends Fragment {
         setLayoutManager(isGrid);
 
         Button toggleButton = view.findViewById(R.id.toggleButton);
+
+        pb = view.findViewById(R.id.progressBar);
 
         List<Rout> routs = new ArrayList<>();
 
@@ -85,7 +88,8 @@ public class Routs extends Fragment {
         recycler.setAdapter(routsAdapter);
     }
 
-    private void getRouts(List<Rout> routs){
+    private void getRouts(List<Rout> routs) {
+        pb.setVisibility(View.VISIBLE);
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference ridesRef = database.getReference("rides");
 
@@ -115,13 +119,16 @@ public class Routs extends Fragment {
                 }
 
                 // Set the adapter after data retrieval
-                routsAdapter = new Adaptor(routs, getParentFragmentManager(),isGrid);
+                routsAdapter = new Adaptor(routs, getParentFragmentManager(), isGrid);
                 recycler.setAdapter(routsAdapter);
+                pb.setVisibility(View.INVISIBLE);
             }
 
             @Override
             public void onCancelled(DatabaseError error) {
                 // Handle cancellation
+
+                pb.setVisibility(View.INVISIBLE);
             }
         });
     }

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create Trip Form</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #010d16;
+      color: white;
+    }
+
+    .container {
+      background-color: #011627;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      width: 80%; 
+      max-width: 600px;
+      height: 90vh;
+      display: grid;
+      grid-template-columns: 1fr;
+      grid-gap: 10px;
+    }
+
+    label {
+      font-weight: bold;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    input[type="number"],
+    select {
+      padding: 8px;
+      box-sizing: border-box;
+      width: 100%;
+    }
+
+    #stopsContainer {
+      display: grid;
+      grid-template-columns: 1fr;
+      grid-gap: 10px;
+    }
+
+    #stopsNames {
+      display: grid;
+      grid-template-columns: 1fr;
+      grid-gap: 5px;
+    }
+
+    button {
+      padding: 8px 12px;
+    }
+
+    @media (min-width: 768px) {
+      .container {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Create Trip</h1>
+    <form id="tripForm">
+      <label for="startLocation">Start Location:</label>
+      <input type="text" id="startLocation" name="startLocation" required>
+
+      <label for="endLocation">End Location:</label>
+      <input type="text" id="endLocation" name="endLocation" required>
+
+      <div id="stopsContainer">
+        <label for="numOfStops">Number of Stops:</label>
+        <input type="number" id="numOfStops" name="numOfStops" min="0" value="0">
+        
+        <div id="stopsNames"></div>
+      </div>
+
+      <button type="button" onclick="addStopFields()">Add Stop</button>
+
+      <label for="tripDate">Trip Date:</label>
+      <input type="date" id="tripDate" name="tripDate" required>
+
+      <label for="tripTime">Trip Start Time:</label>
+      <select id="tripTime" name="tripTime" required>
+        <option value="7:30am">7:30 AM</option>
+        <option value="5:30pm">5:30 PM</option>
+      </select>
+
+      <button type="submit">Create Trip</button>
+    </form>
+  </div>
+
+  <script>
+    function addStopFields() {
+      const numStops = parseInt(document.getElementById('numOfStops').value);
+
+      const stopsNamesDiv = document.getElementById('stopsNames');
+      stopsNamesDiv.innerHTML = '';
+
+      for (let i = 1; i <= numStops; i++) {
+        const stopInput = document.createElement('input');
+        stopInput.type = 'text';
+        stopInput.name = `stop${i}`;
+        stopInput.placeholder = `Stop ${i} Name`;
+        stopInput.required = true;
+
+        stopsNamesDiv.appendChild(stopInput);
+      }
+    }
+
+    document.getElementById('tripForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const formData = new FormData(this);
+      const tripData = {};
+
+      for (const [key, value] of formData.entries()) {
+        tripData[key] = value;
+      }
+
+      console.log(tripData);
+      // Here, you can handle the collected trip data (e.g., send it to a server)
+    });
+  </script>
+</body>
+</html>

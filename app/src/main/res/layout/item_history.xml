@@ -48,7 +48,7 @@
                 android:id="@+id/status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Rate/5"
+                android:text="Status"
                 android:textSize="30sp"
                 android:fontFamily="@font/raleway_extralight"
                 app:layout_constraintTop_toTopOf="parent"

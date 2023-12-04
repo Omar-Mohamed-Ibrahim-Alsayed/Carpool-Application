@@ -13,6 +13,7 @@ import com.google.firebase.auth.FirebaseUser;
 public class MainActivity extends AppCompatActivity  {
     private FirebaseAuth mAuth;
     SignIn si = new SignIn();
+    String user_type;
     @Override
     public void onStart() {
         super.onStart();
@@ -20,7 +21,13 @@ public class MainActivity extends AppCompatActivity  {
         // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if(currentUser != null){
-            Intent intent = new Intent(this, CustomerApp.class);
+            user_type = currentUser.getDisplayName();
+            Intent intent;
+            if (user_type.equals("Client")) {
+                intent = new Intent(this, CustomerApp.class);
+            } else {
+                intent = new Intent(this, DriverApp.class);
+            }
             startActivity(intent);
         }
     }
