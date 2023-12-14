@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/order_background"
-    tools:context=".fragments.Order">
+    tools:context=".fragments.Orderfrag">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -72,42 +72,46 @@
             app:layout_constraintTop_toBottomOf="@+id/distination" />
 
         <TextView
-            android:id="@+id/paymentText"
+            android:id="@+id/seatsText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
             android:fontFamily="@font/raleway_extralight"
             android:layout_marginTop="20dp"
             android:layout_marginEnd="20dp"
-            android:text="Payment Status: "
+            android:text="Available Seats: "
             android:textColor="#FFF"
             android:textSize="20sp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/date" />
 
+
         <TextView
-            android:id="@+id/paymentStatus"
+            android:id="@+id/rideText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
+            android:fontFamily="@font/raleway_extralight"
             android:layout_marginTop="20dp"
             android:layout_marginEnd="20dp"
-            android:text="Not Paid "
-            android:fontFamily="@font/raleway_semibold"
-            android:textColor="#BF6E6E"
+            android:text="Ride Status: "
+            android:textColor="#FFF"
             android:textSize="20sp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/paymentText" />
+            app:layout_constraintTop_toBottomOf="@+id/seatsText" />
+
 
         <Button
+            android:id="@+id/addToCart"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/paymentStatus"
-            android:text="Pay Now"
+            android:backgroundTint="#858585"
             android:fontFamily="@font/raleway_semibold"
-            android:backgroundTint="#858585"/>
+            android:text="Add to cart"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/rideText" />
 
 
 

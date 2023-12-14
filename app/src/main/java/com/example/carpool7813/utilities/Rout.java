@@ -1,69 +1,98 @@
 package com.example.carpool7813.utilities;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class Rout {
-    private String driver;
-    private List<String> riders;
-    private List<String> stops;
-    private String start, end;
-    private LocalDateTime time;
 
-    public Rout(String driver, List<String> riders, List<String> stops, String start, String end, LocalDateTime time) {
-        this.driver = driver;
-        this.riders = riders;
-        this.stops = stops;
-        this.start = start;
-        this.end = end;
-        this.time = time;
+    private String rideId;
+    private String startLocation;
+    private String destination;
+    private LocalDateTime departureTime;
+    private LocalDateTime reservationDeadline;
+    private int seatsAvailable;
+    private String driverID;
+    private String status;
+
+    public Rout(String rideId, String startLocation, String destination, LocalDateTime departureTime,
+                LocalDateTime reservationDeadline, int seatsAvailable, String driverID, String status) {
+        this.rideId = rideId;
+        this.startLocation = startLocation;
+        this.destination = destination;
+        this.departureTime = departureTime;
+        this.reservationDeadline = reservationDeadline;
+        this.seatsAvailable = seatsAvailable;
+        this.driverID = driverID;
+        this.status = status;
     }
 
-    public String getDriver() {
-        return driver;
+    public String getRideId() {
+        return rideId;
     }
 
-    public void setDriver(String driver) {
-        this.driver = driver;
+    public void setRideId(String rideId) {
+        this.rideId = rideId;
     }
 
-    public List<String> getRiders() {
-        return riders;
+    public String getStartLocation() {
+        return startLocation;
     }
 
-    public void setRiders(List<String> riders) {
-        this.riders = riders;
+    public void setStartLocation(String startLocation) {
+        this.startLocation = startLocation;
     }
 
-    public List<String> getStops() {
-        return stops;
+    public String getDestination() {
+        return destination;
     }
 
-    public void setStops(List<String> stops) {
-        this.stops = stops;
+    public void setDestination(String destination) {
+        this.destination = destination;
     }
 
-    public String getStart() {
-        return start;
+    public LocalDateTime getDepartureTime() {
+        return departureTime;
     }
 
-    public void setStart(String start) {
-        this.start = start;
+    public void setDepartureTime(LocalDateTime departureTime) {
+        this.departureTime = departureTime;
     }
 
-    public String getEnd() {
-        return end;
+    public LocalDateTime getReservationDeadline() {
+        return reservationDeadline;
     }
 
-    public void setEnd(String end) {
-        this.end = end;
+    public void setReservationDeadline(LocalDateTime reservationDeadline) {
+        this.reservationDeadline = reservationDeadline;
     }
 
-    public LocalDateTime getTime() {
-        return time;
+    public int getSeatsAvailable() {
+        return seatsAvailable;
     }
 
-    public void setTime(LocalDateTime time) {
-        this.time = time;
+    public void setSeatsAvailable(int seatsAvailable) {
+        this.seatsAvailable = seatsAvailable;
+    }
+
+    public String getDriverID() {
+        return driverID;
+    }
+
+    public void setDriverID(String driverID) {
+        this.driverID = driverID;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getFormattedDepartureTime() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd   HH:mm");
+        return this.departureTime.format(formatter);
     }
 }

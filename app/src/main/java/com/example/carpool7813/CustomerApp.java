@@ -49,6 +49,6 @@ public class CustomerApp extends AppCompatActivity {
         });
 
 
-        bottomNavigationView.setSelectedItemId(R.id.profile);
+        bottomNavigationView.setSelectedItemId(R.id.cart);
     }
 }

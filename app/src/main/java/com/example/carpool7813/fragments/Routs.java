@@ -99,22 +99,20 @@ public class Routs extends Fragment {
                 routs.clear();
 
                 for (DataSnapshot rideSnapshot : dataSnapshot.getChildren()) {
-                    String rideID = rideSnapshot.getKey();
-                    String driver = rideSnapshot.child("driver").getValue(String.class);
-                    String clients = rideSnapshot.child("rider").getValue(String.class);
-                    String time = rideSnapshot.child("time").getValue(String.class);
-                    String start = rideSnapshot.child("start").getValue(String.class);
-                    String end = rideSnapshot.child("end").getValue(String.class);
+                    String rideID = rideSnapshot.child("rideID").getValue(String.class);
+                    String startLocation = rideSnapshot.child("startLocation").getValue(String.class);
+                    String destination = rideSnapshot.child("destination").getValue(String.class);
+                    String departureTimeString = rideSnapshot.child("departureTime").getValue(String.class);
+                    String reservationDeadlineString = rideSnapshot.child("reservationDeadline").getValue(String.class);
+                    int seatsAvailable = rideSnapshot.child("seatsAvailable").getValue(Integer.class);
+                    String driverID = rideSnapshot.child("driverID").getValue(String.class);
+                    String status = rideSnapshot.child("status").getValue(String.class);
+
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MMMM/yyyy-HH:mm");
+                    LocalDateTime departureTime = LocalDateTime.parse(departureTimeString, formatter);
+                    LocalDateTime reservationDeadline = LocalDateTime.parse(reservationDeadlineString, formatter);
 
-
-                    // Parse the string into a LocalDateTime object
-                    LocalDateTime dateTime = LocalDateTime.parse(time, formatter);
-                    List<String> clientList = Arrays.asList(clients);
-                    List<String> stopsList = Arrays.asList("empty");
-
-
-                    Rout rout = new Rout(driver, clientList, stopsList, start, end, dateTime);
+                    Rout rout = new Rout(rideID, startLocation, destination, departureTime, reservationDeadline, seatsAvailable, driverID, status);
                     routs.add(rout);
                 }
 

@@ -10,8 +10,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.carpool7813.R;
-import com.example.carpool7813.fragments.Order;
-import com.example.carpool7813.fragments.Routs;
+import com.example.carpool7813.fragments.Orderfrag;
 
 import java.util.List;
 public class Adaptor extends RecyclerView.Adapter<Adaptor.RoutViewHolder> {
@@ -67,15 +66,14 @@ public class Adaptor extends RecyclerView.Adapter<Adaptor.RoutViewHolder> {
                 public void onClick(View view) {
                     int layoutPosition = getLayoutPosition();
                     Rout current = routs.get(layoutPosition);
-                    fragmentManager.beginTransaction().replace(R.id.flFragment, new Order(current)).addToBackStack(null).commit();
+                    fragmentManager.beginTransaction().replace(R.id.flFragment, new Orderfrag(current)).addToBackStack(null).commit();
                 }
             });
         }
 
         public void bind(Rout Rout) {
-            name.setText(Rout.getStart() + '/' + Rout.getEnd());
-            describtion.setText(Rout.getTime().toString() + "\n" + "10" + "Stops: ");
-            // Load image here if required
+            name.setText(Rout.getStartLocation() + '/' + Rout.getDestination());
+            describtion.setText(Rout.getFormattedDepartureTime().toString() + "\n" + "Available Seats: "+Rout.getSeatsAvailable());
         }
     }
 }
