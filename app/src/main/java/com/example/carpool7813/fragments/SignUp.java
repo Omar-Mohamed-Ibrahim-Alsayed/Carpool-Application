@@ -1,14 +1,10 @@
 package com.example.carpool7813.fragments;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,42 +12,32 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import com.example.carpool7813.CustomerApp;
 import com.example.carpool7813.DriverApp;
 import com.example.carpool7813.R;
+import com.example.carpool7813.ViewModel.SignupViewModel;
+import com.example.carpool7813.interfaces.SignUpCallback;
+import com.example.carpool7813.model.FirebaseHandler;
 import com.example.carpool7813.utilities.User;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.UserProfileChangeRequest;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
-
-import java.util.HashMap;
-import java.util.Map;
 
 
-public class SignUp extends Fragment {
-    private FirebaseAuth mAuth;
+public class SignUp extends Fragment implements SignUpCallback {
+
     Button signUp, toggleUser;
     EditText e_et, p_et, pp_et, n_et;
     String email, password, name, password2, type;
     ProgressBar pb;
     boolean user_type = true;
+    SignupViewModel suvm;
+    //FirebaseAuthManager auth;
+    FirebaseHandler auth;
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mAuth = FirebaseAuth.getInstance();
+
     }
 
     @Override
@@ -66,6 +52,8 @@ public class SignUp extends Fragment {
         signUp = view.findViewById(R.id.signUpButton);
         toggleUser = view.findViewById(R.id.userTypeSwitch);
         pb = view.findViewById(R.id.progressBar);
+        suvm = SignupViewModel.getInstance();
+        auth = FirebaseHandler.getInstance();
 
         toggleUser.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -89,46 +77,12 @@ public class SignUp extends Fragment {
                     type = "Driver";
                 }
 
-                if (!checkInput(name, email, password, password2)) {
+                if (!suvm.checkInput(getContext(),name, email, password, password2)) {
                     return;
                 }
+                handleInfo(name,email,password,type);
 
-                mAuth.createUserWithEmailAndPassword(email, password)
-                        .addOnCompleteListener(getActivity(), new OnCompleteListener<AuthResult>() {
-                            @Override
-                            public void onComplete(@NonNull Task<AuthResult> task) {
-                                if (task.isSuccessful()) {
-                                    FirebaseUser user = mAuth.getCurrentUser();
 
-                                    // Set the display name here
-                                    UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                                            .setDisplayName(type)
-                                            .build();
-
-                                    if (user != null) {
-                                        user.updateProfile(profileUpdates)
-                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                    @Override
-                                                    public void onComplete(@NonNull Task<Void> updateTask) {
-                                                        if (updateTask.isSuccessful()) {
-                                                            Toast.makeText(getContext(), "Successful", Toast.LENGTH_LONG).show();
-                                                            databaseUpdate();
-                                                            reload();
-
-                                                        } else {
-                                                            Toast.makeText(getContext(), "Failed to set display name", Toast.LENGTH_LONG).show();
-                                                        }
-                                                    }
-                                                });
-
-                                    }
-                                } else {
-                                    Toast.makeText(getContext(), "Failed", Toast.LENGTH_LONG).show();
-                                }
-                                signUp.setText("Sign Up");
-                                pb.setVisibility(View.INVISIBLE);
-                            }
-                        });
             }
         });
 
@@ -136,77 +90,20 @@ public class SignUp extends Fragment {
         return view;
     }
 
-    boolean checkInput(String name, String email, String password, String password2) {
-        if (TextUtils.isEmpty(name)) {
-            Toast.makeText(getContext(), "Enter Name", Toast.LENGTH_LONG).show();
-            signUp.setText("Sign Up");
-            pb.setVisibility(View.INVISIBLE);
-            return false;
-        }
-        if (TextUtils.isEmpty(email)) {
-            Toast.makeText(getContext(), "Enter Mail", Toast.LENGTH_LONG).show();
-            signUp.setText("Sign Up");
-            pb.setVisibility(View.INVISIBLE);
-            return false;
-        }
-        if (TextUtils.isEmpty(password)) {
-            Toast.makeText(getContext(), "Enter pass", Toast.LENGTH_LONG).show();
-            signUp.setText("Sign Up");
-            pb.setVisibility(View.INVISIBLE);
-            return false;
-        }
-        if (!password.equals(password2)) {
-            Toast.makeText(getContext(), "Passwords" + password + "  do not match" + password2, Toast.LENGTH_LONG).show();
-            signUp.setText("Sign Up");
-            pb.setVisibility(View.INVISIBLE);
-            return false;
-        }
-        if (!email.endsWith("@eng.asu.edu.eg")) {
-            Toast.makeText(getContext(), "Email must end with @eng.asu.edu.eg", Toast.LENGTH_LONG).show();
-            signUp.setText("Sign Up");
-            pb.setVisibility(View.INVISIBLE);
-            return false;
-        }
-        if (!password.matches(".*[A-Z].*")) {
-            Toast.makeText(getContext(), "Password must contain at least one uppercase character", Toast.LENGTH_LONG).show();
-            signUp.setText("Sign Up");
-            pb.setVisibility(View.INVISIBLE);
-            return false;
-        }
-        if (!password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?].*")) {
-            Toast.makeText(getContext(), "Password must contain at least one special character", Toast.LENGTH_LONG).show();
-            signUp.setText("Sign Up");
-            pb.setVisibility(View.INVISIBLE);
-            return false;
-        }
-        if (!password.matches(".*\\d.*")) {
-            Toast.makeText(getContext(), "Password must contain at least one number", Toast.LENGTH_LONG).show();
-            signUp.setText("Sign Up");
-            pb.setVisibility(View.INVISIBLE);
-            return false;
-        }
-        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            Toast.makeText(getContext(), "Enter a valid email address", Toast.LENGTH_LONG).show();
-            signUp.setText("Sign Up");
-            pb.setVisibility(View.INVISIBLE);
-            return false;
-        }
-        return true;
+    public void handleInfo(String name, String email, String password, String type) {
+        auth.registerUser(this,getActivity(),getContext(),name,email,password,type);
+
     }
 
-    private void reload() {
-        DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
-        FirebaseUser user = mAuth.getCurrentUser();
-        User newUser = new User(type, user.getEmail(), user.getDisplayName());
+    @Override
+    public void onUserReceived(User user) {
+        Log.e("INNNN ADD USER",user.getId());
+        auth.addUser(user);
+        reload();
+    }
 
-        String newUserId = usersRef.push().getKey();
-        usersRef.child(newUserId).setValue(newUser);
-        Context context = getActivity();
-        SharedPreferences sharedPref = context.getSharedPreferences(
-                getString(R.string.preference_file_key), Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString("Mail", user.getEmail());
-        editor.apply();
+
+    private void reload() {
         Intent intent;
         if (user_type) {
             intent = new Intent(getContext(), CustomerApp.class);
@@ -217,27 +114,6 @@ public class SignUp extends Fragment {
         startActivity(intent);
     }
 
-    private void databaseUpdate(){
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        Map<String, Object> user = new HashMap<>();
-        user.put("Name", name);
-        user.put("Email", email);
-        user.put("Type", type);
 
-        db.collection("users")
-                .add(user)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                    @Override
-                    public void onSuccess(DocumentReference documentReference) {
-
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(getContext(), "Database Not updated", Toast.LENGTH_LONG).show();
-                    }
-                });
-    }
 
 }

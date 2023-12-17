@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.carpool7813.R;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
 public class CartAdaptor extends RecyclerView.Adapter<CartAdaptor.OrderViewModel> {
@@ -29,6 +30,12 @@ public class CartAdaptor extends RecyclerView.Adapter<CartAdaptor.OrderViewModel
         itemRoutView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_cart, parent, false);
 
         return new CartAdaptor.OrderViewModel(itemRoutView);
+    }
+
+    public void updateData(List<Order> orders) {
+        this.Orders.clear(); // Clear existing data
+        this.Orders.addAll(orders); // Add new data
+        notifyDataSetChanged(); // Notify adapter about dataset change
     }
 
     @Override
@@ -71,7 +78,10 @@ public class CartAdaptor extends RecyclerView.Adapter<CartAdaptor.OrderViewModel
         public void bind(Order order) {
             name.setText(order.getOrderID());
             date.setText(order.getTimeOfBooking().toString() );
-            price.setText(String.valueOf(order.getPrice()) + " EGP");
+            DecimalFormat decimalFormat = new DecimalFormat("#.##");
+            String formattedPrice = decimalFormat.format(order.getPrice());
+            float fprice = Float.parseFloat(formattedPrice);
+            price.setText(fprice + " EGP");
         }
     }
 }

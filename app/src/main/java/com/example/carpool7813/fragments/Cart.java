@@ -14,6 +14,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.carpool7813.R;
+import com.example.carpool7813.interfaces.OrdersCallback;
+import com.example.carpool7813.model.FirebaseHandler;
 import com.example.carpool7813.utilities.Adaptor;
 import com.example.carpool7813.utilities.CartAdaptor;
 import com.example.carpool7813.utilities.Order;
@@ -26,13 +28,14 @@ import com.google.firebase.database.ValueEventListener;
 
 import org.w3c.dom.Text;
 
+import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class Cart extends Fragment {
+public class Cart extends Fragment implements OrdersCallback {
 
     ProgressBar pb;
     CartAdaptor ordersAdapter;
@@ -41,7 +44,8 @@ public class Cart extends Fragment {
     FragmentManager fragmentManager;
     TextView total;
     float tprice;
-
+    FirebaseHandler fb;
+    List<Order> orders;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -58,6 +62,8 @@ public class Cart extends Fragment {
         recycler = view.findViewById(R.id.rview);
         pay = view.findViewById(R.id.payAll);
         total = view.findViewById(R.id.total);
+        pb.setVisibility(View.INVISIBLE);
+        fb = FirebaseHandler.getInstance();
         if (isAdded()) {
             FragmentManager fragmentManager = getParentFragmentManager();
 
@@ -65,7 +71,9 @@ public class Cart extends Fragment {
 
 
         List<Order> orders = new ArrayList<>();
-        getOrders(orders);
+
+        ordersAdapter = new CartAdaptor(orders, getParentFragmentManager());
+        getOrders();
 
         pay.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -79,49 +87,28 @@ public class Cart extends Fragment {
         return view;
     }
 
-
-    private void getOrders(List<Order> orders) {
-        pb.setVisibility(View.VISIBLE);
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference ridesRef = database.getReference("orders");
-
-        ridesRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                orders.clear();
-                tprice = 0;
-
-                for (DataSnapshot orderSnapshot : dataSnapshot.getChildren()) {
-                    String orderID = orderSnapshot.child("orderID").getValue(String.class);
-                    String userID = orderSnapshot.child("userID").getValue(String.class);
-                    String rideID = orderSnapshot.child("rideID").getValue(String.class);
-                    String timeOfBookingString = orderSnapshot.child("timeOfBooking").getValue(String.class);
-                    String paymentStatus = orderSnapshot.child("paymentStatus").getValue(String.class);
-                    String status = orderSnapshot.child("status").getValue(String.class);
-                    float price = orderSnapshot.child("price").getValue(Float.class);
-                    tprice += price;
-
-                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MMM/yyyy-HH:mm", Locale.ENGLISH);
-                    LocalDateTime timeOfBooking = LocalDateTime.parse(timeOfBookingString, formatter);
-
-
-                    Order order = new Order(orderID,paymentStatus,rideID, status,timeOfBooking,userID,price);
-                    orders.add(order);
-                }
-
-                total.setText("Total = " + tprice);
-                ordersAdapter = new CartAdaptor(orders, getParentFragmentManager());
-                recycler.setAdapter(ordersAdapter);
-                pb.setVisibility(View.INVISIBLE);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-                // Handle cancellation
-
-                pb.setVisibility(View.INVISIBLE);
-            }
-        });
+    @Override
+    public void onOrdersReceived(List<Order> orders) {
+        total.setText("Total = " + calculateTotal(orders));
+        ordersAdapter.updateData(orders);
+        recycler.setAdapter(ordersAdapter);
+        pb.setVisibility(View.INVISIBLE);
     }
 
+    private void getOrders() {
+        pb.setVisibility(View.VISIBLE);
+        fb.getOrders(this);
+
+    }
+
+    private float calculateTotal(List<Order> orders) {
+        float totalPrice = 0.0f;
+        for (Order order : orders) {
+            totalPrice += order.getPrice();
+        }
+        DecimalFormat decimalFormat = new DecimalFormat("#.##");
+        String formattedPrice = decimalFormat.format(totalPrice);
+        totalPrice = Float.parseFloat(formattedPrice);
+        return totalPrice;
+    }
 }

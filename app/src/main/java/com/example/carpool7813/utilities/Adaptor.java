@@ -23,6 +23,11 @@ public class Adaptor extends RecyclerView.Adapter<Adaptor.RoutViewHolder> {
         this.fragmentManager = fragmentManager;
         this.isGrid = isGrid;
     }
+    public void updateData(List<Rout> newRouts) {
+        this.routs.clear();
+        this.routs.addAll(newRouts);
+        notifyDataSetChanged();
+    }
 
     @Override
     public RoutViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {

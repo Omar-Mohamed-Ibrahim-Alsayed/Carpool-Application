@@ -1,17 +1,13 @@
 package com.example.carpool7813.fragments;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,19 +19,15 @@ import android.widget.Toast;
 
 import com.example.carpool7813.CustomerApp;
 import com.example.carpool7813.DriverApp;
-import com.example.carpool7813.MainActivity;
 import com.example.carpool7813.R;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.auth.AuthResult;
+import com.example.carpool7813.interfaces.SigninCallback;
+import com.example.carpool7813.model.FirebaseHandler;
+import com.example.carpool7813.utilities.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import java.util.concurrent.Executor;
 
-
-public class SignIn extends Fragment {
+public class SignIn extends Fragment implements SigninCallback {
     TextView signUpLink;
     SignUp su;
     FragmentManager parentFragmentManager;
@@ -45,42 +37,28 @@ public class SignIn extends Fragment {
     EditText email_et;
     EditText password_et;
     ProgressBar pb;
+    User user;
+    FirebaseHandler authManager;
 
-    private void reload() {
-        FirebaseUser user = mAuth.getCurrentUser();
-        Context context = getActivity();
-        SharedPreferences sharedPref = context.getSharedPreferences(
-                getString(R.string.preference_file_key), Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString("Mail", user.getEmail());
-        editor.putString("Type", user.getDisplayName());
-        editor.apply();
-        user_type = user.getDisplayName();
-        Intent intent;
-        if (user_type.equals("Client")) {
-            intent = new Intent(context, CustomerApp.class);
-        } else {
-            intent = new Intent(context, DriverApp.class);
-        }
-        startActivity(intent);
-    }
 
     @Override
     public void onStart() {
         super.onStart();
         // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = mAuth.getCurrentUser();
-
+        authManager = FirebaseHandler.getInstance();
         if (currentUser != null) {
-            reload();
+            authManager.getUser(this);
 
         }
     }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_sign_in, container, false);
+
         mAuth = FirebaseAuth.getInstance();
         signUpLink = view.findViewById(R.id.signUpLink);
         su = new SignUp();
@@ -89,9 +67,12 @@ public class SignIn extends Fragment {
         password_et = view.findViewById(R.id.passwordEditText);
         pb = view.findViewById(R.id.progressBar);
 
+
+
         signUpLink.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 parentFragmentManager.beginTransaction().replace(R.id.flFragment, su).addToBackStack(null).commit();
             }
         });
@@ -115,31 +96,45 @@ public class SignIn extends Fragment {
                         pb.setVisibility(View.INVISIBLE);
                         return;
                     }
-                    mAuth.signInWithEmailAndPassword(email, password)
-                            .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                                @Override
-                                public void onComplete(@NonNull Task<AuthResult> task) {
-                                    if (task.isSuccessful()) {
 
-                                        reload();
+                    handleInfo();
 
-                                    } else {
-                                        Toast.makeText(getContext(), "Failed", Toast.LENGTH_LONG).show();
-
-
-                                    }
-                                    signIn_button.setText("Sign Up");
-                                    pb.setVisibility(View.INVISIBLE);
-
-                                }
-
-                            });
 
                 }
         );
 
 
-        return view; // Return the inflated view instead of re-inflating the layout
+        return view;
+    }
+
+
+    @Override
+    public void onUserReceived(User user) {
+        if(user != null){
+            reload();
+        }
+    }
+
+    public void handleInfo(){
+        authManager.loginUser(this ,getContext(),email,password);
+    }
+
+
+    private void reload() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        Context context = getActivity();
+        user_type = user.getDisplayName();
+        Intent intent;
+        if (user_type.equals("Client")) {
+            intent = new Intent(context, CustomerApp.class);
+            startActivity(intent);
+        } else if(user_type.equals("Driver")) {
+            intent = new Intent(context, DriverApp.class);
+            startActivity(intent);
+        }
+        else{
+
+        }
     }
 }
 

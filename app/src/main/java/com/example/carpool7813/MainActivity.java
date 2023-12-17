@@ -25,10 +25,12 @@ public class MainActivity extends AppCompatActivity  {
             Intent intent;
             if (user_type.equals("Client")) {
                 intent = new Intent(this, CustomerApp.class);
-            } else {
+                startActivity(intent);
+            } else if (user_type.equals("Driver")){
                 intent = new Intent(this, DriverApp.class);
+                startActivity(intent);
             }
-            startActivity(intent);
+
         }
     }
     @Override

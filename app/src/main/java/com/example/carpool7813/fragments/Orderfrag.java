@@ -48,7 +48,7 @@ public class Orderfrag extends Fragment {
         seats = view.findViewById(R.id.seatsText);
         status = view.findViewById(R.id.rideText);
         addToCart = view.findViewById(R.id.addToCart);
-        fb = new FirebaseHandler();
+        fb = FirebaseHandler.getInstance();
 
         pickup.setText("From: " + rout.getStartLocation());
         destination.setText("To: " + rout.getDestination());

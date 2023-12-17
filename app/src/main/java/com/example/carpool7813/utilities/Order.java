@@ -10,9 +10,9 @@ public class Order {
     private String status;
     private LocalDateTime timeOfBooking;
     private String userID;
-    private double price; // New field to hold the price
+    private float price; // New field to hold the price
 
-    public Order(String orderID, String paymentStatus, String rideID, String status, LocalDateTime timeOfBooking, String userID, double price) {
+    public Order(String orderID, String paymentStatus, String rideID, String status, LocalDateTime timeOfBooking, String userID, float price) {
         this.orderID = orderID;
         this.paymentStatus = paymentStatus;
         this.rideID = rideID;
@@ -26,7 +26,7 @@ public class Order {
         return price;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(float price) {
         this.price = price;
     }
 
