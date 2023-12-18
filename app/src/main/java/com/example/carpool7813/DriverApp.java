@@ -1,6 +1,7 @@
 package com.example.carpool7813;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.os.Bundle;
@@ -12,7 +13,9 @@ import android.webkit.WebViewClient;
 import com.example.carpool7813.ViewModel.userViewModel;
 import com.example.carpool7813.interfaces.OrdersCallback;
 import com.example.carpool7813.interfaces.RoutsCallback;
+import com.example.carpool7813.interfaces.UserCallback;
 import com.example.carpool7813.model.FirebaseHandler;
+import com.example.carpool7813.model.userProfile;
 import com.example.carpool7813.utilities.Order;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -20,11 +23,11 @@ import com.google.firebase.auth.FirebaseAuth;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DriverApp extends AppCompatActivity implements OrdersCallback {
+public class DriverApp extends AppCompatActivity implements OrdersCallback, UserCallback {
     BottomNavigationView bottomNavigationView;
     WebView webView;
     userViewModel userViewModel;
-    String userName,userMail;
+    String userName,userMail = null;
     FirebaseHandler fb = FirebaseHandler.getInstance();
     List<Order> orders;
 
@@ -46,7 +49,7 @@ public class DriverApp extends AppCompatActivity implements OrdersCallback {
 
         // Initialize ViewModel and retrieve user data
         userViewModel = new ViewModelProvider(this).get(userViewModel.class);
-        observeUserData();
+        openProfile();
 
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
@@ -71,6 +74,44 @@ public class DriverApp extends AppCompatActivity implements OrdersCallback {
         bottomNavigationView.setSelectedItemId(R.id.profile);
     }
 
+    @Override
+    public void onCallback(LiveData<userProfile> user) {
+        String fileName = "profile.html";
+        if (user != null) {
+            user.observeForever(userProfile -> {
+                if (userProfile != null) {
+                    userName = userProfile.getName();
+                    userMail = userProfile.getEmail();
+
+                    webView.setWebViewClient(new WebViewClient() {
+                        @Override
+                        public void onPageFinished(WebView view, String url) {
+                            super.onPageFinished(view, url);
+
+                            String mailInfo = userMail != null ? userMail : "";
+                            String nameInfo = userName != null ? userName : "";
+
+                            // Execute JavaScript function in the WebView after page is loaded
+                            webView.evaluateJavascript(
+                                    "updateUserInfo('" + nameInfo + "', '" + mailInfo + "');",
+                                    null
+                            );
+                        }
+                    });
+                    webView.getSettings().setDomStorageEnabled(true);
+                    webView.getSettings().setJavaScriptEnabled(true);
+                    webView.loadUrl("file:///android_asset/" + fileName);
+                }else{
+                    userViewModel.getStudentFromVm(this);
+                }
+            });
+        }
+        else{
+            userViewModel.getStudentFromVm(this);
+        }
+
+    }
+
     public static class WebAppInterface {
         private final DriverApp mActivity;
 
@@ -84,27 +125,11 @@ public class DriverApp extends AppCompatActivity implements OrdersCallback {
             mActivity.finish();
         }
     }
-
-
-
-    private void loadInitialWebView() {
-        // Load WebView with default content or any initial HTML before user data retrieval
-        loadWebView("routs.html");
-    }
-
-    private void observeUserData() {
-        userViewModel.getStudentFromVm().observe(this, student -> {
-            if (student != null) {
-                userName = student.getName();
-                userMail = student.getEmail();
-                loadWebView("profile.html");
-            } else {
-            }
-        });
-    }
-
-    private void loadWebView(String fileName) {
-        if(fileName.equals("profile.html")){
+    private void openProfile(){
+        loadWebView("loading.html");
+        if(userName == null || userMail == null){
+        userViewModel.getStudentFromVm(this);
+        }else{
             webView.setWebViewClient(new WebViewClient() {
                 @Override
                 public void onPageFinished(WebView view, String url) {
@@ -120,8 +145,14 @@ public class DriverApp extends AppCompatActivity implements OrdersCallback {
                     );
                 }
             });
+            webView.getSettings().setDomStorageEnabled(true);
             webView.getSettings().setJavaScriptEnabled(true);
-            webView.loadUrl("file:///android_asset/" + fileName);
+            webView.loadUrl("file:///android_asset/" + "profile.html");
+        }
+    }
+    private void loadWebView(String fileName) {
+        if(fileName.equals("profile.html")){
+            openProfile();
         }
         else if(fileName.equals("requests.html")){
             webView.setWebViewClient(new WebViewClient() {
@@ -153,6 +184,9 @@ public class DriverApp extends AppCompatActivity implements OrdersCallback {
             });
             webView.getSettings().setJavaScriptEnabled(true);
             webView.loadUrl("file:///android_asset/" + fileName);
+        }else if(fileName.equals("loading.html")){
+
+            webView.loadUrl("file:///android_asset/" + fileName);
         }
 
     }
@@ -164,7 +198,7 @@ public class DriverApp extends AppCompatActivity implements OrdersCallback {
     @Override
     protected void onResume() {
         super.onResume();
-        observeUserData();
+        //openProfile();
     }
 
     @Override
@@ -177,17 +211,13 @@ public class DriverApp extends AppCompatActivity implements OrdersCallback {
         if (this != null) {
             this.finish();
         }
+        userViewModel.deleteAll();
     }
 
     @Override
     public void onOrdersReceived(List<Order> orders) {
         this.orders = orders;
 
-        if(orders.isEmpty()){
-            Log.e("NO ORDERS","NO ORDERS");
-        }else{
-            Log.e("Orders Found","Orders Found");
-        }
         StringBuilder tableRows = new StringBuilder();
 
         for (Order order : orders) {

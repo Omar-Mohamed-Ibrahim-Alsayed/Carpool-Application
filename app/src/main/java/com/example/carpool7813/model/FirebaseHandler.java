@@ -241,7 +241,7 @@ public class FirebaseHandler {
         return userId;
     }
 
-    public void loginUser(SigninCallback callback, Context context, String email, String password) {
+    public void loginUser( Context context, String email, String password) {
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
@@ -252,7 +252,6 @@ public class FirebaseHandler {
                             if (currentUser != null) {
                                 user = new User(currentUser.getUid(), currentUser.getDisplayName(), currentUser.getEmail(),"");
                             }
-                            callback.onUserReceived(user);
                         } else {
                             Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show();
                         }

@@ -49,13 +49,15 @@ public class SignIn extends Fragment implements SigninCallback {
     @Override
     public void onStart() {
         super.onStart();
+        signIn_button.setText(" ");
+        pb.setVisibility(View.VISIBLE);
         FirebaseUser currentUser = mAuth.getCurrentUser();
         authManager = FirebaseHandler.getInstance();
         if (currentUser != null) {
-
             authManager.getUser(this);
-            //reload();
         }
+        signIn_button.setText("Sign In");
+        pb.setVisibility(View.INVISIBLE);
     }
 
 
@@ -116,14 +118,18 @@ public class SignIn extends Fragment implements SigninCallback {
     public void onUserReceived(User user) {
         if(user != null){
             addUser(user);
+
+            Toast.makeText(getContext(),"USER NAME IS: "+ user.getName(),Toast.LENGTH_SHORT).show();
             signIn_button.setText("Sign In");
             pb.setVisibility(View.INVISIBLE);
             reload();
+        }else{
+            authManager.getUser(this);
         }
     }
 
     public void handleInfo(){
-        authManager.loginUser(this ,getContext(),email,password);
+        authManager.loginUser(getContext(),email,password);
         authManager.getUser(this);
     }
 

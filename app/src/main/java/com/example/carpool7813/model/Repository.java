@@ -15,6 +15,7 @@ import com.example.carpool7813.databases.RoutDatabase;
 import com.example.carpool7813.databases.profileDB;
 import com.example.carpool7813.interfaces.RoutDao;
 import com.example.carpool7813.interfaces.SigninCallback;
+import com.example.carpool7813.interfaces.UserCallback;
 import com.example.carpool7813.interfaces.userDao;
 import com.example.carpool7813.utilities.User;
 
@@ -29,6 +30,7 @@ public class Repository implements SigninCallback {
     private LiveData<List<userProfile>> listUsers;
     private LiveData<List<RoutEntity>> listRouts;
     private LiveData<userProfile> user;
+    UserCallback callback;
 
 
     public Repository(Application application) {
@@ -39,12 +41,7 @@ public class Repository implements SigninCallback {
         routDao = routDatabase.routDao();
         listUsers = userDao.getStudent();
         listRouts = routDao.getAllRouts();
-        if(fb.getUserId()!=null){
-            user = userDao.getUser();
-        }else{
-            fb.getUser(this);
 
-        }
     }
 
     public void insertUser(userProfile student) {
@@ -56,12 +53,32 @@ public class Repository implements SigninCallback {
         return listUsers;
     }
 
-    public LiveData<userProfile> getUser() {
-        return user;
+    public void getUser(UserCallback callback) {
+        this.callback = callback;
+        if(fb.getUserId()!=null){
+            user = userDao.getUser();
+            if (user != null) {
+                user.observeForever(userProfile -> {
+                    if (userProfile != null) {
+                    }else{
+                        Log.e("USER NAME IS","Couldnt fetch user from room. trying again." );
+                        fb.getUser(this);
+                    }
+                });
+            callback.onCallback(user);
+        }}
+        else{
+            Log.e("User in firebase","User in firebase" );
+            fb.getUser(this);
+        }
     }
 
     public LiveData<List<RoutEntity>> getAllRouts() {
         return listRouts;
+    }
+
+    public void deleteAll(){
+        profileDB.databaseWriteExecutor.execute(() -> userDao.deleteAll());
     }
 
 
@@ -70,6 +87,11 @@ public class Repository implements SigninCallback {
         User u = user;
         insertUser(new userProfile(u.getId(),u.getName(),u.getEmail(),u.getUserType()));
         this.user = userDao.getUser();
-        //Log.e("FOUND: " + this.user. ,"FOUND");
+        if(this.user != null) {
+            callback.onCallback(this.user);
+        }else{
+            Log.e("USER NAME IS","TRYING AGAIN" );
+            fb.getUser(this);
+        }
     }
 }

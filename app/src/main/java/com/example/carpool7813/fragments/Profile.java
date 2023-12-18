@@ -4,9 +4,11 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +20,7 @@ import android.widget.Toast;
 import com.example.carpool7813.R;
 import com.example.carpool7813.interfaces.RepoCallBack;
 import com.example.carpool7813.interfaces.SigninCallback;
+import com.example.carpool7813.interfaces.UserCallback;
 import com.example.carpool7813.model.FirebaseHandler;
 import com.example.carpool7813.ViewModel.userViewModel;
 import com.example.carpool7813.model.userProfile;
@@ -27,7 +30,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 
-public class Profile extends Fragment {
+public class Profile extends Fragment implements UserCallback {
     Button sign_out_button;
     FragmentManager parentFragmentManager;
     private FirebaseAuth mAuth;
@@ -50,6 +53,7 @@ public class Profile extends Fragment {
         super.onStart();
         pb.setVisibility(View.VISIBLE);
         fb = FirebaseHandler.getInstance();
+        userViewModel = new ViewModelProvider(this).get(userViewModel.class);
         //fb.getUser(this);
         getUser();
     }
@@ -73,6 +77,8 @@ public class Profile extends Fragment {
                 if (getActivity() != null) {
                     getActivity().finish();
                 }
+
+                userViewModel.deleteAll();
             }
         });
 
@@ -81,15 +87,20 @@ public class Profile extends Fragment {
     }
 
     void getUser() {
-        userViewModel = new ViewModelProvider(this).get(userViewModel.class);
-        userViewModel.getStudentFromVm().observe(getViewLifecycleOwner(), students -> {
-            if (students != null) {
-                welcome_tx.setText(getString(R.string.profile_title) + " " + students.getName());
-                mail_tx.setText(students.getEmail());
-                pb.setVisibility(View.INVISIBLE);
-            }else{
-            }
-        });
+        userViewModel.getStudentFromVm(this);
     }
 
+    @Override
+    public void onCallback(LiveData<userProfile> user) {
+        if (user != null) {
+            user.observeForever(userProfile -> {
+                if (userProfile != null) {
+                    welcome_tx.setText(getString(R.string.profile_title) + " " + userProfile.getName());
+                    mail_tx.setText(userProfile.getEmail());
+                    pb.setVisibility(View.INVISIBLE);
+                }
+            });
+        }
+
+    }
 }
