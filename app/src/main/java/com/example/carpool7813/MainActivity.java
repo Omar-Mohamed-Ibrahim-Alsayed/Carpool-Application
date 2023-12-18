@@ -17,21 +17,21 @@ public class MainActivity extends AppCompatActivity  {
     @Override
     public void onStart() {
         super.onStart();
-        mAuth = FirebaseAuth.getInstance();
-        // Check if user is signed in (non-null) and update UI accordingly.
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if(currentUser != null){
-            user_type = currentUser.getDisplayName();
-            Intent intent;
-            if (user_type.equals("Client")) {
-                intent = new Intent(this, CustomerApp.class);
-                startActivity(intent);
-            } else if (user_type.equals("Driver")){
-                intent = new Intent(this, DriverApp.class);
-                startActivity(intent);
-            }
-
-        }
+//        mAuth = FirebaseAuth.getInstance();
+//        // Check if user is signed in (non-null) and update UI accordingly.
+//        FirebaseUser currentUser = mAuth.getCurrentUser();
+//        if(currentUser != null){
+//            user_type = currentUser.getDisplayName();
+//            Intent intent;
+//            if (user_type.equals("Client")) {
+//                intent = new Intent(this, CustomerApp.class);
+//                startActivity(intent);
+//            } else if (user_type.equals("Driver")){
+//                intent = new Intent(this, DriverApp.class);
+//                startActivity(intent);
+//            }
+//
+//        }
     }
     @Override
     protected void onCreate(Bundle savedInstanceState) {

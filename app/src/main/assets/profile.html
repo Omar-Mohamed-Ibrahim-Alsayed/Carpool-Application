@@ -58,9 +58,19 @@
 </head>
 <body>
   <h1 id="welcomeText">It's nice to meet you!</h1>
+  <p id="name_info">Name</p>
   <p id="nameText">Email</p>
   <p id="mail_info">email@email.com</p>
   <p id="edit_profile">Not You?</p>
-  <button id="signOutButton">SignOut</button>
+  <button id="signOutButton" onclick="signOut()">SignOut</button>
+  <script>
+    function updateUserInfo(name, email) {
+      document.getElementById('name_info').innerText = name;
+      document.getElementById('mail_info').innerText = email;
+    }
+  function signOut() {
+    AndroidInterface.onSignOutClicked();
+  }
+  </script>
 </body>
 </html>

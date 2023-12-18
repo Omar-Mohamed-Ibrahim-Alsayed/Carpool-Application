@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,13 +13,16 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.example.carpool7813.CustomerApp;
 import com.example.carpool7813.DriverApp;
 import com.example.carpool7813.R;
 import com.example.carpool7813.ViewModel.SignupViewModel;
+import com.example.carpool7813.ViewModel.userViewModel;
 import com.example.carpool7813.interfaces.SignUpCallback;
 import com.example.carpool7813.model.FirebaseHandler;
+import com.example.carpool7813.model.userProfile;
 import com.example.carpool7813.utilities.User;
 
 
@@ -32,6 +36,7 @@ public class SignUp extends Fragment implements SignUpCallback {
     SignupViewModel suvm;
     //FirebaseAuthManager auth;
     FirebaseHandler auth;
+    userViewModel userViewModel;
 
 
     @Override
@@ -99,7 +104,15 @@ public class SignUp extends Fragment implements SignUpCallback {
     public void onUserReceived(User user) {
         Log.e("INNNN ADD USER",user.getId());
         auth.addUser(user);
+        addUser(user);
+
         reload();
+    }
+    void addUser(User user2) {
+        userProfile user = new userProfile(user2.getId(),user2.getName(),user2.getEmail(),type);
+        userViewModel = new ViewModelProvider(this).get(userViewModel.class);
+        userViewModel.insertUser(user);
+
     }
 
 

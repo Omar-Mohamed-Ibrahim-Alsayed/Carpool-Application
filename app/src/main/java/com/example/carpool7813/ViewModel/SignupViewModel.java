@@ -4,8 +4,13 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.widget.Toast;
 
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
+import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
+
 public class SignupViewModel {
     private static SignupViewModel instance;
+
     private SignupViewModel() {
 
     }
@@ -63,6 +68,7 @@ public class SignupViewModel {
 
             return false;
         }
+
         return true;
     }
 

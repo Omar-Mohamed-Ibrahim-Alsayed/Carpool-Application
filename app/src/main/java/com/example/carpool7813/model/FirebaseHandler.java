@@ -198,7 +198,7 @@ public class FirebaseHandler {
         //FirebaseUser user = mAuth.getCurrentUser();
         user = new User(user2.getId(),user2.getUserType(), user2.getEmail(), user2.getName());
 
-        String userId = usersRef.push().getKey();
+        String userId = getUserId();
         usersRef.child(userId).setValue(user);
     }
 
@@ -240,6 +240,7 @@ public class FirebaseHandler {
         }
         return userId;
     }
+
     public void loginUser(SigninCallback callback, Context context, String email, String password) {
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
@@ -249,7 +250,7 @@ public class FirebaseHandler {
                             Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show();
                             FirebaseUser currentUser = mAuth.getCurrentUser();
                             if (currentUser != null) {
-                                user = new User(currentUser.getUid(), currentUser.getDisplayName(), currentUser.getEmail(), "YourNameHere");
+                                user = new User(currentUser.getUid(), currentUser.getDisplayName(), currentUser.getEmail(),"");
                             }
                             callback.onUserReceived(user);
                         } else {
@@ -258,7 +259,6 @@ public class FirebaseHandler {
                     }
                 });
 
-        Log.e("INNNN ADD USER", "FROM LOGIN");
     }
 
     public void registerUser(SignUpCallback callback, Activity activity, Context context, String name, String email, String password, String type) {

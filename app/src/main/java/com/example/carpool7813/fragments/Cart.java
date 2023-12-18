@@ -43,9 +43,8 @@ public class Cart extends Fragment implements OrdersCallback {
     Button pay;
     FragmentManager fragmentManager;
     TextView total;
-    float tprice;
     FirebaseHandler fb;
-    List<Order> orders;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -98,7 +97,6 @@ public class Cart extends Fragment implements OrdersCallback {
     private void getOrders() {
         pb.setVisibility(View.VISIBLE);
         fb.getOrders(this);
-
     }
 
     private float calculateTotal(List<Order> orders) {
