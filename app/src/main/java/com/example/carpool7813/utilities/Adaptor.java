@@ -82,13 +82,16 @@ public class Adaptor extends RecyclerView.Adapter<Adaptor.RoutViewHolder> {
                     LocalDateTime currentDateTime = LocalDateTime.now();
 
                     rideDateTime = current.getDepartureTime();
+                    LocalDateTime morningRideCutoff = LocalDateTime.of(rideDateTime.minusDays(1).toLocalDate(),morningRideCutoffTime);
+                    LocalDateTime afternoonRideCutoff = LocalDateTime.of(rideDateTime.minusDays(1).toLocalDate(),morningRideCutoffTime);
+
 
                     if ((rideDateTime.toLocalTime().equals(LocalTime.of(7, 30)) &&
-                            currentDateTime.toLocalTime().isAfter(morningRideCutoffTime))||(rideDateTime.toLocalTime().equals(LocalTime.of(7, 30)) &&currentDateTime.toLocalTime().isBefore(LocalTime.of(7, 30)))) {
+                            currentDateTime.isAfter(morningRideCutoff))||(rideDateTime.toLocalTime().equals(LocalTime.of(7, 30)) &&currentDateTime.toLocalTime().isBefore(LocalTime.of(7, 30)))) {
 
                     }
                     else if (rideDateTime.toLocalTime().equals(LocalTime.of(17, 30)) &&
-                            currentDateTime.toLocalTime().isAfter(afternoonRideCutoffTime)) {
+                            currentDateTime.isAfter(afternoonRideCutoff)) {
 
                     }else{
                         fragmentManager.beginTransaction().replace(R.id.flFragment, new Orderfrag(current)).addToBackStack(null).commit();
@@ -101,15 +104,17 @@ public class Adaptor extends RecyclerView.Adapter<Adaptor.RoutViewHolder> {
             LocalDateTime currentDateTime = LocalDateTime.now();
 
             rideDateTime = Rout.getDepartureTime();
+            LocalDateTime morningRideCutoff = LocalDateTime.of(rideDateTime.minusDays(1).toLocalDate(),morningRideCutoffTime);
+            LocalDateTime afternoonRideCutoff = LocalDateTime.of(rideDateTime.minusDays(1).toLocalDate(),morningRideCutoffTime);
 
             if ((rideDateTime.toLocalTime().equals(LocalTime.of(7, 30)) &&
-                    currentDateTime.toLocalTime().isAfter(morningRideCutoffTime))||(rideDateTime.toLocalTime().equals(LocalTime.of(7, 30)) &&currentDateTime.toLocalTime().isBefore(LocalTime.of(7, 30)))) {
+                    currentDateTime.isAfter(morningRideCutoff))||(rideDateTime.toLocalTime().equals(LocalTime.of(7, 30)) &&currentDateTime.toLocalTime().isBefore(LocalTime.of(7, 30)))) {
                 name.setText(Rout.getStartLocation() + '/' + Rout.getDestination());
                 describtion.setText(Rout.getFormattedDepartureTime().toString() + "\n" + "TIME PASSED");
                 background.setBackgroundColor(Color.parseColor("#FF401111"));
             }
             else if (rideDateTime.toLocalTime().equals(LocalTime.of(17, 30)) &&
-                    currentDateTime.toLocalTime().isAfter(afternoonRideCutoffTime)) {
+                    currentDateTime.isAfter(afternoonRideCutoff)) {
                 name.setText(Rout.getStartLocation() + '/' + Rout.getDestination());
                 describtion.setText(Rout.getFormattedDepartureTime().toString() + "\n" + "TIME PASSED");
                 background.setBackgroundColor(Color.parseColor("#FF401111"));

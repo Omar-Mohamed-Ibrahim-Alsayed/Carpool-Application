@@ -45,9 +45,12 @@ public class Cart extends Fragment implements OrdersCallback {
     TextView total;
     FirebaseHandler fb;
 
+    List<Order> orders;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        orders = new ArrayList<>();
         super.onCreate(savedInstanceState);
 
     }
@@ -64,12 +67,11 @@ public class Cart extends Fragment implements OrdersCallback {
         pb.setVisibility(View.INVISIBLE);
         fb = FirebaseHandler.getInstance();
         if (isAdded()) {
-            FragmentManager fragmentManager = getParentFragmentManager();
+            fragmentManager = getParentFragmentManager();
 
         }
 
 
-        List<Order> orders = new ArrayList<>();
 
         ordersAdapter = new CartAdaptor(orders, getParentFragmentManager());
         getOrders();
@@ -78,7 +80,13 @@ public class Cart extends Fragment implements OrdersCallback {
             @Override
             public void onClick(View v) {
                 if (fragmentManager != null) {
-                    fragmentManager.beginTransaction().replace(R.id.flFragment, new Payment(orders)).addToBackStack(null).commit();
+                    List<Order> filteredOrders = new ArrayList<>();
+                    for (Order order : orders) {
+                        if (!order.getStatus().equals("pending")) {
+                            filteredOrders.add(order);
+                        }
+                    }
+                    fragmentManager.beginTransaction().replace(R.id.flFragment, new Payment(filteredOrders)).addToBackStack(null).commit();
                 }
             }
         });
@@ -88,8 +96,15 @@ public class Cart extends Fragment implements OrdersCallback {
 
     @Override
     public void onOrdersReceived(List<Order> orders) {
+        List<Order> filteredOrders = new ArrayList<>();
+        for (Order order : orders) {
+            if (!order.getPaymentStatus().equals("paid")) {
+                        filteredOrders.add(order);
+            }
+        }
+        this.orders = filteredOrders;
         total.setText("Total = " + calculateTotal(orders));
-        ordersAdapter.updateData(orders);
+        ordersAdapter.updateData(filteredOrders);
         recycler.setAdapter(ordersAdapter);
         pb.setVisibility(View.INVISIBLE);
     }
@@ -103,7 +118,9 @@ public class Cart extends Fragment implements OrdersCallback {
     private float calculateTotal(List<Order> orders) {
         float totalPrice = 0.0f;
         for (Order order : orders) {
+            if(order.getStatus().equals("accepted") && !order.getPaymentStatus().equals("paid")){
             totalPrice += order.getPrice();
+            }
         }
         DecimalFormat decimalFormat = new DecimalFormat("#.##");
         String formattedPrice = decimalFormat.format(totalPrice);

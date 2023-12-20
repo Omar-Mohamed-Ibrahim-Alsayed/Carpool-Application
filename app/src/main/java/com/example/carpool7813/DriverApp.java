@@ -22,6 +22,10 @@ import com.example.carpool7813.utilities.Rout;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -41,6 +45,7 @@ public class DriverApp extends AppCompatActivity implements OrdersCallback, User
     LocalTime morningRideCutoffTime = LocalTime.of(23, 30);
     LocalTime afternoonRideCutoffTime = LocalTime.of(16, 30);
     LocalDateTime rideDateTime;
+    static Rout newRout;
 
     @Override
     protected void onStart() {
@@ -94,29 +99,7 @@ public class DriverApp extends AppCompatActivity implements OrdersCallback, User
 
     @Override
     public void onCallback(LiveData<userProfile> userLiveData) {
-        userProfile userProfile = userLiveData.getValue();
-        if (userProfile != null) {
-            userName = userProfile.getName();
-            userMail = userProfile.getEmail();
 
-            webView.setWebViewClient(new WebViewClient() {
-                @Override
-                public void onPageFinished(WebView view, String url) {
-                    super.onPageFinished(view, url);
-
-                    String mailInfo = userMail != null ? userMail : "";
-                    String nameInfo = userName != null ? userName : "";
-
-                    // Execute JavaScript function in the WebView after page is loaded
-                    webView.evaluateJavascript(
-                            "updateUserInfo('" + nameInfo + "', '" + mailInfo + "');",
-                            null
-                    );
-                }
-            });
-        } else {
-            //userViewModel.getStudentFromVm(this);
-        }
     }
 
     @Override
@@ -153,10 +136,28 @@ public class DriverApp extends AppCompatActivity implements OrdersCallback, User
         }
 
         @android.webkit.JavascriptInterface
+        public void handleData(String tripData) {
+
+            mActivity.handleDataFromWebView(tripData);
+        }
+
+        @android.webkit.JavascriptInterface
+        public void handleOrderReply(String orderID, boolean accept) {
+
+            Log.e("DAte","INNNNNNNNNNNNNNN HANDLEREPLY");
+            mActivity.handleReply(orderID, accept);
+        }
+
+        @android.webkit.JavascriptInterface
         public void onSignOutClicked() {
             userViewModel.deleteAll();
             FirebaseAuth.getInstance().signOut();
             mActivity.finish();
+        }
+
+        @android.webkit.JavascriptInterface
+        public void updateNow() {
+            mActivity.update();
         }
     }
     private void openProfile(){
@@ -187,17 +188,21 @@ public class DriverApp extends AppCompatActivity implements OrdersCallback, User
     private void loadWebView(String fileName) {
         if(fileName.equals("profile.html")){
             openProfile();
+
+            webView.getSettings().setJavaScriptEnabled(true);
+            webView.loadUrl("file:///android_asset/" +fileName);
         }
         else if(fileName.equals("requests.html")){
+            webView.getSettings().setJavaScriptEnabled(true);
+            webView.loadUrl("file:///android_asset/" + fileName);
+
             webView.setWebViewClient(new WebViewClient() {
                 @Override
                 public void onPageFinished(WebView view, String url) {
-                    super.onPageFinished(view, url);
                     getOrders();
+                    super.onPageFinished(view, url);
                 }
             });
-            webView.getSettings().setJavaScriptEnabled(true);
-            webView.loadUrl("file:///android_asset/" + fileName);
         }else if(fileName.equals("routs.html")){
             webView.setWebViewClient(new WebViewClient() {
                 @Override
@@ -213,7 +218,6 @@ public class DriverApp extends AppCompatActivity implements OrdersCallback, User
                 @Override
                 public void onPageFinished(WebView view, String url) {
                     super.onPageFinished(view, url);
-                    getOrders();
                 }
             });
             webView.getSettings().setJavaScriptEnabled(true);
@@ -229,16 +233,6 @@ public class DriverApp extends AppCompatActivity implements OrdersCallback, User
         fb.getOrders(this);
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        //openProfile();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-    }
 
     public void onSignOutClicked(View v) {
         FirebaseAuth.getInstance().signOut();
@@ -254,7 +248,6 @@ public class DriverApp extends AppCompatActivity implements OrdersCallback, User
 
         List<Order> filteredOrders = new ArrayList<>();
         List<Rout> filteredRouts = new ArrayList<>();
-        // Filter and add orders where the rideId is connected to the current user's driverId
         if (routs != null && !routs.isEmpty()) {
             String currentUserDriverId = fb.getUserId();
 
@@ -264,7 +257,6 @@ public class DriverApp extends AppCompatActivity implements OrdersCallback, User
                         if (order.getRideID().equals(rout.getRideId())) {
                             filteredOrders.add(order);
                             filteredRouts.add(rout);
-                            Log.e("DATE",rout.getDepartureTime().toString());
                         }
                     }
                 }
@@ -278,57 +270,113 @@ public class DriverApp extends AppCompatActivity implements OrdersCallback, User
         StringBuilder tableRows = new StringBuilder();
         LocalDateTime currentDateTime = LocalDateTime.now();
 
+
+        JSONArray jsonArray = new JSONArray();
+
         for (Rout rout : routs) {
             for (Order order : filteredOrders) {
                 if (order.getRideID().equals(rout.getRideId())) {
                     rideDateTime = rout.getDepartureTime();
+                    LocalDateTime morningRideCutoff = LocalDateTime.of(rideDateTime.minusDays(1).toLocalDate(),morningRideCutoffTime);
+                    LocalDateTime afternoonRideCutoff = LocalDateTime.of(rideDateTime.minusDays(1).toLocalDate(),morningRideCutoffTime);
+
 
                     if ((rideDateTime.toLocalTime().equals(LocalTime.of(7, 30)) &&
-                            currentDateTime.toLocalTime().isAfter(morningRideCutoffTime))||(rideDateTime.toLocalTime().equals(LocalTime.of(7, 30)) &&currentDateTime.toLocalTime().isBefore(LocalTime.of(7, 30)))) {
-                        tableRows.append("<tr>");
-                        tableRows.append("<td>").append(order.getUserID()).append("</td>");
-                        tableRows.append("<td>").append(rout.getDestination()).append("</td>");
-                        tableRows.append("<td>").append(order.getTimeOfBooking()).append("</td>");
-                        tableRows.append("<td>TIME PASSED</td>");
-                        tableRows.append("</tr>");
+                            currentDateTime.isAfter(morningRideCutoff))||(rideDateTime.toLocalTime().equals(LocalTime.of(7, 30)) &&currentDateTime.toLocalTime().isBefore(LocalTime.of(7, 30)))) {
+                        JSONObject orderJson = new JSONObject();
+                        try {
+                            orderJson.put("userID", order.getUserID());
+                            orderJson.put("destination", rout.getDestination()); // Replace getOrderDestination with your logic
+                            orderJson.put("timeOfBooking", order.getTimeOfBooking());
+                            orderJson.put("status","passed");
+                            orderJson.put("orderID", order.getOrderID());
+                            jsonArray.put(orderJson);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
                     // Check for afternoon ride cut-off
                     else if (rideDateTime.toLocalTime().equals(LocalTime.of(17, 30)) &&
-                            currentDateTime.toLocalTime().isAfter(afternoonRideCutoffTime)) {
-                        // Handle orders for afternoon rides after cut-off time
-                        tableRows.append("<tr>");
-                        tableRows.append("<td>").append(order.getUserID()).append("</td>");
-                        tableRows.append("<td>").append(rout.getDestination()).append("</td>");
-                        tableRows.append("<td>").append(order.getTimeOfBooking()).append("</td>");
-                        tableRows.append("<td>TIME PASSED</td>");
-                        tableRows.append("</tr>");
+                            currentDateTime.isAfter(afternoonRideCutoff)) {
+                        JSONObject orderJson = new JSONObject();
+                        try {
+                            orderJson.put("userID", order.getUserID());
+                            orderJson.put("destination", rout.getDestination()); // Replace getOrderDestination with your logic
+                            orderJson.put("timeOfBooking", order.getTimeOfBooking());
+                            orderJson.put("status","passed");
+                            orderJson.put("orderID", order.getOrderID());
+                            jsonArray.put(orderJson);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
-                    // Default case for orders before cut-off time
                     else {
-                        tableRows.append("<tr>");
-                        tableRows.append("<td>").append(order.getUserID()).append("</td>");
-                        tableRows.append("<td>").append(rout.getDestination()).append("</td>");
-                        tableRows.append("<td>").append(order.getTimeOfBooking()).append("</td>");
-                        tableRows.append("<td><button class=\"accept-button\">Accept</button>")
-                                .append("<button class=\"decline-button\">Decline</button></td>");
-                        tableRows.append("</tr>");
+                        JSONObject orderJson = new JSONObject();
+                        try {
+                            orderJson.put("userID", order.getUserID());
+                            orderJson.put("destination", rout.getDestination()); // Replace getOrderDestination with your logic
+                            orderJson.put("timeOfBooking", order.getTimeOfBooking());
+                            orderJson.put("status", order.getStatus());
+                            orderJson.put("orderID", order.getOrderID());
+                            jsonArray.put(orderJson);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
+
                 }
             }
         }
 
-        // Inject JavaScript to add table rows to the tbody element
-        webView.evaluateJavascript(
-                "document.getElementById('ordersTableBody').innerHTML = '" + tableRows.toString() + "';",
-                null
-        );
+        String jsonOrders = jsonArray.toString();
+
+        // Pass the JSON string to the WebView
+        webView.evaluateJavascript("updateOrders('" + jsonOrders + "');", null);
     }
-
-
 
     @Override
     public void onRoutsReceived(List<Rout> routs) {
         this.routs = routs;
     }
 
+    public void handleDataFromWebView(String tripData) {
+        try {
+            JSONObject jsonObject = new JSONObject(tripData);
+            Log.e("DAte","formattedDateTime");
+
+            String startLocation = jsonObject.optString("startLocation");
+            String endLocation = jsonObject.optString("endLocation");
+            String seats = jsonObject.optString("seats");
+            String tripDate = jsonObject.optString("tripDate");
+            String tripTime = jsonObject.optString("tripTime");
+            String uid = fb.getUserId();
+
+            LocalDate date = LocalDate.parse(tripDate);
+            LocalTime time = LocalTime.parse(tripTime.toUpperCase(), DateTimeFormatter.ofPattern("h:mma", Locale.ENGLISH));
+
+            LocalDateTime dateTime = LocalDateTime.of(date, time);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MMMM/yyyy-HH:mm", Locale.ENGLISH);
+            String formattedDateTime = dateTime.format(formatter);
+
+
+
+
+            fb.addRout(this,"",startLocation,endLocation,formattedDateTime,formattedDateTime,Integer.parseInt(seats),uid,"Active");
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Log.e("DAte","ERROR");
+
+        }catch (Exception e){
+            Log.e("DAte","ERROR");
+        }
+    }
+
+    void handleReply(String orderID, boolean accept){
+        Log.e("DAte","INNNNNNNNNNNNNNN HANDLEREPLY");
+        fb.reply(orderID,accept);
+    }
+
+    void update(){
+        loadWebView("requests.html");
+    }
 }

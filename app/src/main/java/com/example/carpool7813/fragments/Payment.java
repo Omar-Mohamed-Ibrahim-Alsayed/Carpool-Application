@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import com.example.carpool7813.R;
+import com.example.carpool7813.model.FirebaseHandler;
 import com.example.carpool7813.utilities.Order;
 import com.example.carpool7813.utilities.Rout;
 
@@ -19,6 +20,7 @@ import java.util.List;
 public class Payment extends Fragment {
     List<Order> orders;
     Button pay;
+    FirebaseHandler fb;
     public Payment(List<Order> orders) {
         this.orders = orders;
     }
@@ -26,6 +28,7 @@ public class Payment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        fb = FirebaseHandler.getInstance();
 
     }
 
@@ -39,7 +42,7 @@ public class Payment extends Fragment {
         pay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                fb.pay(getContext(),orders);
             }
         });
 

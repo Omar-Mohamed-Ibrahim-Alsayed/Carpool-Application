@@ -15,22 +15,22 @@ import com.example.carpool7813.R;
 import java.text.DecimalFormat;
 import java.util.List;
 
-public class CartAdaptor extends RecyclerView.Adapter<CartAdaptor.OrderViewModel> {
+public class HistoryAdaptor extends RecyclerView.Adapter<HistoryAdaptor.OrderViewModel> {
     private List<Order> Orders;
     private FragmentManager fragmentManager;
     private boolean isGrid;
 
-    public CartAdaptor(List<Order> Orders, FragmentManager fragmentManager) {
+    public HistoryAdaptor(List<Order> Orders, FragmentManager fragmentManager) {
         this.Orders = Orders;
         this.fragmentManager = fragmentManager;
     }
 
     @Override
-    public CartAdaptor.OrderViewModel onCreateViewHolder(ViewGroup parent, int viewType) {
+    public HistoryAdaptor.OrderViewModel onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemRoutView;
-        itemRoutView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_cart, parent, false);
+        itemRoutView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_history, parent, false);
 
-        return new CartAdaptor.OrderViewModel(itemRoutView);
+        return new HistoryAdaptor.OrderViewModel(itemRoutView);
     }
 
     public void updateData(List<Order> orders) {
@@ -40,7 +40,7 @@ public class CartAdaptor extends RecyclerView.Adapter<CartAdaptor.OrderViewModel
     }
 
     @Override
-    public void onBindViewHolder(CartAdaptor.OrderViewModel holder, int position) {
+    public void onBindViewHolder(HistoryAdaptor.OrderViewModel holder, int position) {
         Order current = Orders.get(position);
         holder.bind(current);
     }
@@ -57,39 +57,20 @@ public class CartAdaptor extends RecyclerView.Adapter<CartAdaptor.OrderViewModel
     public class OrderViewModel extends RecyclerView.ViewHolder {
         private TextView name;
         private TextView date;
-        private TextView price;
         private TextView status;
-        View background;
 
         public OrderViewModel(View itemView) {
             super(itemView);
             name = itemView.findViewById(R.id.destinationName);
             date = itemView.findViewById(R.id.date);
-            price = itemView.findViewById(R.id.price);
             status = itemView.findViewById(R.id.status);
-            background = itemView.findViewById(R.id.background);
 
-//            itemView.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View view) {
-//                    int layoutPosition = getLayoutPosition();
-//                    //Order current = Orders.get(layoutPosition);
-//                    //fragmentManager.beginTransaction().replace(R.id.flFragment, new Order(current)).addToBackStack(null).commit();
-//                }
-//            });
         }
 
         public void bind(Order order) {
             name.setText(order.getOrderID());
             status.setText(order.getStatus());
             date.setText(order.getTimeOfBooking().toString() );
-            DecimalFormat decimalFormat = new DecimalFormat("#.##");
-            String formattedPrice = decimalFormat.format(order.getPrice());
-            float fprice = Float.parseFloat(formattedPrice);
-            price.setText(fprice + " EGP");
-            if(order.getStatus().equals("pending")){
-                background.setBackgroundColor(Color.parseColor("#FF401111"));
-            }
         }
     }
 }

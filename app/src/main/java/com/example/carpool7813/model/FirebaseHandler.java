@@ -348,13 +348,75 @@ public class FirebaseHandler {
                 });
     }
 
-    public void addRout(Rout rout2){
+    public void addRout(Context context,String rideId, String startLocation, String destination, String departureTime,
+                        String reservationDeadline, int seatsAvailable, String driverId, String status){
         DatabaseReference usersRef = db.getReference("rides");
 
-        rout = new Rout(rout2.getRideId(), rout2.getStartLocation(),rout2.getDestination(),rout2.getDepartureTime(),rout2.getReservationDeadline(),rout2.getSeatsAvailable(),rout2.getDriverID(),rout2.getStatus());
+        String routId = driverId + destination;
+        Map<String, Object> routUpdates = new HashMap<>();
+        routUpdates.put("rideID", routId);
+        routUpdates.put("startLocation", startLocation);
+        routUpdates.put("destination", destination);
+        routUpdates.put("departureTime", departureTime);
+        routUpdates.put("reservationDeadline", reservationDeadline);
+        routUpdates.put("seatsAvailable", seatsAvailable);
+        routUpdates.put("driverID", driverId);
+        routUpdates.put("status", status);
 
-        String routId = rout2.getDriverID() + rout2.getDestination();
-        usersRef.child(routId).setValue(rout);
+        usersRef.child(routId).setValue(routUpdates);
+
+        Toast.makeText(context,"Ride added successfully",Toast.LENGTH_SHORT).show();
+    }
+
+    public void pay(Context context,List<Order> orderList) {
+        DatabaseReference ordersRef = db.getReference().child("orders");
+
+        for (Order order : orderList) {
+            String orderID = order.getOrderID();
+            Map<String, Object> paymentUpdate = new HashMap<>();
+            paymentUpdate.put("paymentStatus", "paid");
+
+            ordersRef.child(orderID).updateChildren(paymentUpdate)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                           Toast.makeText(context,"All accepted rides paid",Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+
+                            Toast.makeText(context,"Failed to update payment status for order: " + orderID,Toast.LENGTH_SHORT).show();
+                            Log.e("FirebaseHandler", "Failed to update payment status for order: " + orderID, e);
+
+                        }
+                    });
+        }
+    }
+
+    public void reply(String orderID, boolean reply) {
+        DatabaseReference orderRef = db.getReference().child("orders").child(orderID);
+
+        String newStatus = reply ? "accepted" : "rejected";
+        Map<String, Object> statusUpdate = new HashMap<>();
+        statusUpdate.put("status", newStatus);
+
+        orderRef.updateChildren(statusUpdate)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d("FirebaseHandler", "Order status updated to " + newStatus + " for order: " + orderID);
+                        // Additional actions upon successful status update if needed
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("FirebaseHandler", "Failed to update order status for order: " + orderID, e);
+                        // Handle the failure scenario accordingly
+                    }
+                });
     }
 
 

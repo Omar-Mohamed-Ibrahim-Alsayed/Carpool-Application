@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>Driver Dashboard</title>
+    
     <style>
         body {
             background-color: #011627;
@@ -52,8 +53,77 @@
             }
         }
     </style>
+    
 </head>
 <body>
+    <script id="sc">
+        function acceptOrder(orderID) {
+            AndroidInterface.handleOrderReply(orderID, true); 
+            console.log("HIIIIIIIIIIIIIII");
+            setTimeout(() => {
+                console.log('Waited for 2 seconds');
+            }, 2000);
+            AndroidInterface.updateNow(); 
+        }
+
+        // JavaScript function to handle rejecting an order
+        function rejectOrder(orderID) {
+            AndroidInterface.handleOrderReply(orderID, false); // 'false' indicates rejection
+            console.log("HIIIIIIIIIIIIIII");
+            setTimeout(() => {
+                console.log('Waited for 2 seconds');
+            }, 2000);
+            AndroidInterface.updateNow(); 
+            
+        }
+
+        function updateOrders(jsonOrders) {
+            console.log("HIIIIIIIIIIIIIII");
+            const orders = JSON.parse(jsonOrders);
+            const tableBody = document.getElementById('ordersTableBody');
+
+            // Clear existing table rows
+            tableBody.innerHTML = '';
+
+            orders.forEach(order => {
+                const row = tableBody.insertRow();
+
+                const userIDCell = row.insertCell();
+                userIDCell.textContent = order.userID;
+
+                const destinationCell = row.insertCell();
+                destinationCell.textContent = order.destination;
+
+                const timeOfBookingCell = row.insertCell();
+                timeOfBookingCell.textContent = order.timeOfBooking;
+
+                if(order.status === "passed"){
+                    const s = row.insertCell();
+                    s.textContent = "Passed";
+                }else if(order.status === "accepted"){
+                    const s = row.insertCell();
+                    s.textContent = "Accepted";
+                }else if(order.status === "rejected"){
+                    const s = row.insertCell();
+                    s.textContent = "Rejected";
+                }else{
+                    const actionCell = row.insertCell();
+                    const acceptButton = document.createElement('button');
+                    acceptButton.textContent = 'Accept';
+                    acceptButton.classList.add('accept-button');
+                    acceptButton.onclick = () => acceptOrder(order.orderID); // Replace with your logic
+
+                    const rejectButton = document.createElement('button');
+                    rejectButton.textContent = 'Reject';
+                    rejectButton.classList.add('decline-button');
+                    rejectButton.onclick = () => rejectOrder(order.orderID); // Replace with your logic
+
+                    actionCell.appendChild(acceptButton);
+                    actionCell.appendChild(rejectButton);
+            }
+        });
+    }
+    </script>
     <h1>Driver Dashboard</h1>
     <table>
         <thead>
@@ -68,5 +138,6 @@
             <!-- Table rows will be dynamically added here -->
         </tbody>
     </table>
+    
 </body>
 </html>
