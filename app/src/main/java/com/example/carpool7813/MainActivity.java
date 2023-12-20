@@ -1,6 +1,8 @@
 package com.example.carpool7813;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,7 +18,16 @@ public class MainActivity extends AppCompatActivity  {
     String user_type;
     @Override
     public void onStart() {
+
         super.onStart();
+        SharedPreferences sharedPreferences = getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        boolean yourBooleanValue = true;
+        editor.putBoolean("bypass", yourBooleanValue);
+
+        editor.apply();
 //        mAuth = FirebaseAuth.getInstance();
 //        // Check if user is signed in (non-null) and update UI accordingly.
 //        FirebaseUser currentUser = mAuth.getCurrentUser();

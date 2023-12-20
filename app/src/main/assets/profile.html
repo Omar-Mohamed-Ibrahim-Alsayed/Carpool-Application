@@ -54,6 +54,14 @@
       border: none;
       cursor: pointer;
     }
+    #bypass {
+      margin-top: 10px;
+      padding: 10px 20px;
+      background-color: #411126;
+      color: #FFF;
+      border: none;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -63,6 +71,7 @@
   <p id="mail_info">email@email.com</p>
   <p id="edit_profile">Not You?</p>
   <button id="signOutButton" onclick="signOut()">SignOut</button>
+  <button id="bypass" onclick="bypass()">Bypass Constraint</button>
   <script>
     function updateUserInfo(name, email) {
       document.getElementById('name_info').innerText = name;
@@ -70,6 +79,9 @@
     }
   function signOut() {
     AndroidInterface.onSignOutClicked();
+  }
+  function bypass() {
+    AndroidInterface.onBypassClicked();
   }
   </script>
 </body>

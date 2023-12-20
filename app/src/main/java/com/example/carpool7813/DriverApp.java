@@ -4,11 +4,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
 
 import com.example.carpool7813.ViewModel.userViewModel;
 import com.example.carpool7813.fragments.Routs;
@@ -47,6 +50,7 @@ public class DriverApp extends AppCompatActivity implements OrdersCallback, User
     LocalDateTime rideDateTime;
     static Rout newRout;
 
+    SharedPreferences sharedPreferences;
     @Override
     protected void onStart() {
         super.onStart();
@@ -61,7 +65,7 @@ public class DriverApp extends AppCompatActivity implements OrdersCallback, User
         setContentView(R.layout.activity_driver_app);
         orders = new ArrayList<>();
 
-
+        sharedPreferences=  getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
         webView = findViewById(R.id.webView);
 
@@ -153,6 +157,11 @@ public class DriverApp extends AppCompatActivity implements OrdersCallback, User
             userViewModel.deleteAll();
             FirebaseAuth.getInstance().signOut();
             mActivity.finish();
+        }
+
+        @android.webkit.JavascriptInterface
+        public void onBypassClicked() {
+            mActivity.getPref();
         }
 
         @android.webkit.JavascriptInterface
@@ -280,9 +289,10 @@ public class DriverApp extends AppCompatActivity implements OrdersCallback, User
                     LocalDateTime morningRideCutoff = LocalDateTime.of(rideDateTime.minusDays(1).toLocalDate(),morningRideCutoffTime);
                     LocalDateTime afternoonRideCutoff = LocalDateTime.of(rideDateTime.minusDays(1).toLocalDate(),morningRideCutoffTime);
 
+                    boolean retrievedBooleanValue = sharedPreferences.getBoolean("bypass", true);
 
-                    if ((rideDateTime.toLocalTime().equals(LocalTime.of(7, 30)) &&
-                            currentDateTime.isAfter(morningRideCutoff))||(rideDateTime.toLocalTime().equals(LocalTime.of(7, 30)) &&currentDateTime.toLocalTime().isBefore(LocalTime.of(7, 30)))) {
+                    if (((rideDateTime.toLocalTime().equals(LocalTime.of(7, 30)) &&
+                            currentDateTime.isAfter(morningRideCutoff))||(rideDateTime.toLocalTime().equals(LocalTime.of(7, 30)) &&currentDateTime.toLocalTime().isBefore(LocalTime.of(7, 30))))&&retrievedBooleanValue) {
                         JSONObject orderJson = new JSONObject();
                         try {
                             orderJson.put("userID", order.getUserID());
@@ -296,8 +306,8 @@ public class DriverApp extends AppCompatActivity implements OrdersCallback, User
                         }
                     }
                     // Check for afternoon ride cut-off
-                    else if (rideDateTime.toLocalTime().equals(LocalTime.of(17, 30)) &&
-                            currentDateTime.isAfter(afternoonRideCutoff)) {
+                    else if ((rideDateTime.toLocalTime().equals(LocalTime.of(17, 30)) &&
+                            currentDateTime.isAfter(afternoonRideCutoff))&&retrievedBooleanValue) {
                         JSONObject orderJson = new JSONObject();
                         try {
                             orderJson.put("userID", order.getUserID());
@@ -378,5 +388,20 @@ public class DriverApp extends AppCompatActivity implements OrdersCallback, User
 
     void update(){
         loadWebView("requests.html");
+    }
+    void getPref(){
+
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        boolean yourBooleanValue = false;
+        editor.putBoolean("bypass", yourBooleanValue);
+
+        editor.apply();
+        boolean retrievedBooleanValue = sharedPreferences.getBoolean("bypass", false);
+        if(retrievedBooleanValue){
+            Toast.makeText(this,"Bypass is: " + "TRUE",Toast.LENGTH_LONG).show();
+        }else{
+            Toast.makeText(this,"Bypass is: " + "False",Toast.LENGTH_LONG).show();
+        }
     }
 }

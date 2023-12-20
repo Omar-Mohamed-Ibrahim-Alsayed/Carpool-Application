@@ -1,5 +1,7 @@
 package com.example.carpool7813.utilities;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,14 +25,18 @@ public class Adaptor extends RecyclerView.Adapter<Adaptor.RoutViewHolder> {
     LocalTime morningRideCutoffTime = LocalTime.of(10, 00);
     LocalTime afternoonRideCutoffTime = LocalTime.of(13, 00);
     LocalDateTime rideDateTime;
+    SharedPreferences sharedPreferences;
 
-    public Adaptor(List<Rout> routs, FragmentManager fragmentManager, boolean isGrid) {
+
+    public Adaptor(List<Rout> routs, FragmentManager fragmentManager, boolean isGrid, SharedPreferences sharedPreferences) {
         this.routs = routs;
+        this.sharedPreferences = sharedPreferences;
         this.fragmentManager = fragmentManager;
         this.isGrid = isGrid;
     }
-    public void updateData(List<Rout> newRouts) {
+    public void updateData(List<Rout> newRouts,SharedPreferences sharedPreferences) {
         this.routs.clear();
+        this.sharedPreferences = sharedPreferences;
         this.routs.addAll(newRouts);
         notifyDataSetChanged();
     }
@@ -85,13 +91,14 @@ public class Adaptor extends RecyclerView.Adapter<Adaptor.RoutViewHolder> {
                     LocalDateTime morningRideCutoff = LocalDateTime.of(rideDateTime.minusDays(1).toLocalDate(),morningRideCutoffTime);
                     LocalDateTime afternoonRideCutoff = LocalDateTime.of(rideDateTime.minusDays(1).toLocalDate(),morningRideCutoffTime);
 
+                    boolean retrievedBooleanValue = sharedPreferences.getBoolean("bypass", true);
 
-                    if ((rideDateTime.toLocalTime().equals(LocalTime.of(7, 30)) &&
-                            currentDateTime.isAfter(morningRideCutoff))||(rideDateTime.toLocalTime().equals(LocalTime.of(7, 30)) &&currentDateTime.toLocalTime().isBefore(LocalTime.of(7, 30)))) {
+                    if (((rideDateTime.toLocalTime().equals(LocalTime.of(7, 30)) &&
+                            currentDateTime.isAfter(morningRideCutoff))||(rideDateTime.toLocalTime().equals(LocalTime.of(7, 30)) &&currentDateTime.toLocalTime().isBefore(LocalTime.of(7, 30))))&& retrievedBooleanValue) {
 
                     }
-                    else if (rideDateTime.toLocalTime().equals(LocalTime.of(17, 30)) &&
-                            currentDateTime.isAfter(afternoonRideCutoff)) {
+                    else if (((rideDateTime.toLocalTime().equals(LocalTime.of(17, 30)) &&
+                            currentDateTime.isAfter(afternoonRideCutoff)))&& retrievedBooleanValue) {
 
                     }else{
                         fragmentManager.beginTransaction().replace(R.id.flFragment, new Orderfrag(current)).addToBackStack(null).commit();
@@ -106,15 +113,15 @@ public class Adaptor extends RecyclerView.Adapter<Adaptor.RoutViewHolder> {
             rideDateTime = Rout.getDepartureTime();
             LocalDateTime morningRideCutoff = LocalDateTime.of(rideDateTime.minusDays(1).toLocalDate(),morningRideCutoffTime);
             LocalDateTime afternoonRideCutoff = LocalDateTime.of(rideDateTime.minusDays(1).toLocalDate(),morningRideCutoffTime);
-
-            if ((rideDateTime.toLocalTime().equals(LocalTime.of(7, 30)) &&
-                    currentDateTime.isAfter(morningRideCutoff))||(rideDateTime.toLocalTime().equals(LocalTime.of(7, 30)) &&currentDateTime.toLocalTime().isBefore(LocalTime.of(7, 30)))) {
+            boolean retrievedBooleanValue = sharedPreferences.getBoolean("bypass", true);
+            if (((rideDateTime.toLocalTime().equals(LocalTime.of(7, 30)) &&
+                    currentDateTime.isAfter(morningRideCutoff))||(rideDateTime.toLocalTime().equals(LocalTime.of(7, 30)) &&currentDateTime.toLocalTime().isBefore(LocalTime.of(7, 30))))&& retrievedBooleanValue) {
                 name.setText(Rout.getStartLocation() + '/' + Rout.getDestination());
                 describtion.setText(Rout.getFormattedDepartureTime().toString() + "\n" + "TIME PASSED");
                 background.setBackgroundColor(Color.parseColor("#FF401111"));
             }
-            else if (rideDateTime.toLocalTime().equals(LocalTime.of(17, 30)) &&
-                    currentDateTime.isAfter(afternoonRideCutoff)) {
+            else if ((rideDateTime.toLocalTime().equals(LocalTime.of(17, 30)) &&
+                    currentDateTime.isAfter(afternoonRideCutoff))&& retrievedBooleanValue) {
                 name.setText(Rout.getStartLocation() + '/' + Rout.getDestination());
                 describtion.setText(Rout.getFormattedDepartureTime().toString() + "\n" + "TIME PASSED");
                 background.setBackgroundColor(Color.parseColor("#FF401111"));

@@ -74,6 +74,7 @@ public class FirebaseHandler {
 
     public void addOrder(Context context, Rout rout){
         if (currentUser != null) {
+            if(rout.getSeatsAvailable() > 1){
             String userID = currentUser.getUid();
             String orderID = rout.getRideId() + '_' + userID;
             Date currentDate = new Date();
@@ -96,6 +97,7 @@ public class FirebaseHandler {
                         @Override
                         public void onSuccess(Void aVoid) {
                             Toast.makeText(context, "Added to cart successfully", Toast.LENGTH_SHORT).show();
+                            reduce(rout);
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
@@ -106,7 +108,11 @@ public class FirebaseHandler {
                         }
                     });
         } else {
-            // Handle the case where the user is not signed in
+
+                Toast.makeText(context, "No Seats Available", Toast.LENGTH_SHORT).show();
+        }
+        }else{
+
             Toast.makeText(context, "User not signed in", Toast.LENGTH_SHORT).show();
         }
     }
@@ -419,5 +425,26 @@ public class FirebaseHandler {
                 });
     }
 
+    public void reduce(Rout rout) {
+        DatabaseReference orderRef = db.getReference().child("rides").child(rout.getRideId());
+
+        Integer newStatus = rout.getSeatsAvailable()-1;
+        Map<String, Object> statusUpdate = new HashMap<>();
+        statusUpdate.put("seatsAvailable", newStatus);
+
+        orderRef.updateChildren(statusUpdate)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        // Additional actions upon successful status update if needed
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        // Handle the failure scenario accordingly
+                    }
+                });
+    }
 
 }

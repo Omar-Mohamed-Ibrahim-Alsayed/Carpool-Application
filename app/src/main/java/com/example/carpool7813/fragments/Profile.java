@@ -1,5 +1,7 @@
 package com.example.carpool7813.fragments;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -31,7 +33,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 
 public class Profile extends Fragment implements UserCallback {
-    Button sign_out_button;
+    Button sign_out_button,pass;
     FragmentManager parentFragmentManager;
     private FirebaseAuth mAuth;
     SignIn sign_in_page;
@@ -69,6 +71,7 @@ public class Profile extends Fragment implements UserCallback {
         welcome_tx = view.findViewById(R.id.welcomeText);
         mail_tx = view.findViewById(R.id.mail_info);
         pb = view.findViewById(R.id.progressBar);
+        pass = view.findViewById(R.id.bypass);
 
         sign_out_button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -77,6 +80,28 @@ public class Profile extends Fragment implements UserCallback {
                 FirebaseAuth.getInstance().signOut();
                 if (getActivity() != null) {
                     getActivity().finish();
+                }
+
+            }
+        });
+
+        pass.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                SharedPreferences sharedPreferences =  requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+
+                boolean yourBooleanValue = false;
+                editor.putBoolean("bypass", yourBooleanValue);
+
+                editor.apply();
+                boolean retrievedBooleanValue = sharedPreferences.getBoolean("bypass", false);
+                if(retrievedBooleanValue){
+                Toast.makeText(getContext(),"Bypass is: " + "TRUE",Toast.LENGTH_LONG).show();
+                }else{
+                    Toast.makeText(getContext(),"Bypass is: " + "False",Toast.LENGTH_LONG).show();
                 }
 
             }

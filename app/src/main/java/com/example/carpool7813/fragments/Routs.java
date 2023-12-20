@@ -1,5 +1,7 @@
 package com.example.carpool7813.fragments;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -41,7 +43,7 @@ public class Routs extends Fragment implements RoutsCallback{
     ProgressBar pb;
     FirebaseHandler fb;
 
-
+    SharedPreferences sharedPreferences;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -56,6 +58,8 @@ public class Routs extends Fragment implements RoutsCallback{
 
         recycler = view.findViewById(R.id.rview);
 
+        sharedPreferences=  requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+
         setLayoutManager(isGrid);
 
         Button toggleButton = view.findViewById(R.id.toggleButton);
@@ -66,7 +70,9 @@ public class Routs extends Fragment implements RoutsCallback{
 
         fb = FirebaseHandler.getInstance();
 
-        routsAdapter = new Adaptor(new ArrayList<>(), getParentFragmentManager(), isGrid);
+
+
+        routsAdapter = new Adaptor(new ArrayList<>(), getParentFragmentManager(), isGrid,sharedPreferences);
 
         fb.getRouts(this);
 
@@ -102,7 +108,7 @@ public class Routs extends Fragment implements RoutsCallback{
 
     @Override
     public void onRoutsReceived(List<Rout> routs) {
-        routsAdapter.updateData(routs);
+        routsAdapter.updateData(routs,sharedPreferences);
         recycler.setAdapter(routsAdapter);
         pb.setVisibility(View.INVISIBLE);
     }
