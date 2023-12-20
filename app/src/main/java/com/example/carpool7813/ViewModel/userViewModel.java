@@ -16,14 +16,13 @@ import java.util.List;
 
 public class userViewModel extends AndroidViewModel implements RepoCallBack, UserCallback {
     private Repository studentRepository;
-    private final LiveData<List<userProfile>> listLiveData;
     private LiveData<userProfile> user;
     UserCallback callback;
+    private boolean isFetchingUser = false;
 
     public userViewModel(Application application) {
         super(application);
         studentRepository = new Repository(application);
-        listLiveData = studentRepository.getAllStudents();
 
     }
 
@@ -31,14 +30,16 @@ public class userViewModel extends AndroidViewModel implements RepoCallBack, Use
         studentRepository.getUser(this);
     }
 
-    public LiveData<List<userProfile>> getAllStudentsFromVm() {
-        return listLiveData;
-    }
 
     public void getStudentFromVm(UserCallback callback) {
         this.callback = callback;
-        updateUser();
+        if (!isFetchingUser) {
+            isFetchingUser = true;
+            updateUser();
+        } else {
+        }
     }
+
 
     public void insertUser(userProfile student) {
         studentRepository.insertUser(student);
@@ -57,7 +58,21 @@ public class userViewModel extends AndroidViewModel implements RepoCallBack, Use
     @Override
     public void onCallback(LiveData<userProfile> user) {
         this.user = user;
-        callback.onCallback(user);
+        if (user != null) {
+            callback.onCallback(user);
+        } else {
+            isFetchingUser = false;
+            updateUser();
+        }
+    }
 
+    @Override
+    public void onSpecialCall(userProfile user) {
+        if (user != null) {
+            callback.onSpecialCall(user);
+        } else {
+            isFetchingUser = false;
+            updateUser();
+        }
     }
 }

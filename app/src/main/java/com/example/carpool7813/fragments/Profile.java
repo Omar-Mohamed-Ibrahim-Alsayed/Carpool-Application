@@ -73,12 +73,12 @@ public class Profile extends Fragment implements UserCallback {
         sign_out_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                userViewModel.deleteAll();
                 FirebaseAuth.getInstance().signOut();
                 if (getActivity() != null) {
                     getActivity().finish();
                 }
 
-                userViewModel.deleteAll();
             }
         });
 
@@ -91,16 +91,19 @@ public class Profile extends Fragment implements UserCallback {
     }
 
     @Override
-    public void onCallback(LiveData<userProfile> user) {
-        if (user != null) {
-            user.observeForever(userProfile -> {
-                if (userProfile != null) {
-                    welcome_tx.setText(getString(R.string.profile_title) + " " + userProfile.getName());
-                    mail_tx.setText(userProfile.getEmail());
-                    pb.setVisibility(View.INVISIBLE);
-                }
-            });
-        }
+    public void onCallback(LiveData<userProfile> userLiveData) {
 
+    }
+
+    @Override
+    public void onSpecialCall(userProfile userProfile) {
+        if (userProfile != null) {
+            welcome_tx.setText(getString(R.string.profile_title) + " " + userProfile.getName());
+            mail_tx.setText(userProfile.getEmail());
+            pb.setVisibility(View.INVISIBLE);
+        }else{
+            Toast.makeText(getContext(),"USER NOT FOUND",Toast.LENGTH_LONG).show();
+            getUser();
+        }
     }
 }

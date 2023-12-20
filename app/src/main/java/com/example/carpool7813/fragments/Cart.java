@@ -96,7 +96,8 @@ public class Cart extends Fragment implements OrdersCallback {
 
     private void getOrders() {
         pb.setVisibility(View.VISIBLE);
-        fb.getOrders(this);
+        String id = fb.getUserId();
+        fb.getOrdersForUser(id,this);
     }
 
     private float calculateTotal(List<Order> orders) {

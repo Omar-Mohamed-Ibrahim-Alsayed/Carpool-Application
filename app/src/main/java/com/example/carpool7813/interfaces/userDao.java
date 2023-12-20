@@ -2,6 +2,7 @@ package com.example.carpool7813.interfaces;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
+import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
@@ -15,7 +16,7 @@ import java.util.List;
 @Dao
 public interface userDao {
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insert(userProfile user);
 
     @Update
@@ -30,4 +31,7 @@ public interface userDao {
 
     @Query("DELETE from user_table")
     void deleteAll();
+
+    @Delete
+    void deleteuser(userProfile user);
 }

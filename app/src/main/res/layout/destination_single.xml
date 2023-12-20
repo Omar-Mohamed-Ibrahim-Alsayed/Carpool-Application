@@ -19,6 +19,7 @@
         app:cardCornerRadius="20dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/background"
             android:layout_width="match_parent"
             android:background="#113C40"
             android:paddingBottom="20dp"

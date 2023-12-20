@@ -32,6 +32,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.text.DecimalFormat;
@@ -53,6 +54,7 @@ public class FirebaseHandler {
     List<Order> orders;
     List<Rout> routs;
     User user;
+    Rout rout;
 
 
     private FirebaseHandler() {
@@ -155,7 +157,51 @@ public class FirebaseHandler {
         });
     }
 
+    public void getOrdersForUser(String userID, OrdersCallback callback) {
+        DatabaseReference ordersRef = db.getReference("orders");
 
+        Query userOrdersQuery = ordersRef.orderByChild("userID").equalTo(userID);
+        userOrdersQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                List<Order> orders = new ArrayList<>();
+
+                for (DataSnapshot orderSnapshot : dataSnapshot.getChildren()) {
+                    String orderID = orderSnapshot.child("orderID").getValue(String.class);
+                    String rideID = orderSnapshot.child("rideID").getValue(String.class);
+                    String timeOfBookingString = orderSnapshot.child("timeOfBooking").getValue(String.class);
+                    String paymentStatus = orderSnapshot.child("paymentStatus").getValue(String.class);
+                    String status = orderSnapshot.child("status").getValue(String.class);
+                    String sprice = orderSnapshot.child("price").getValue(String.class);
+                    float price = 0.0f;
+
+                    if (sprice != null) {
+                        try {
+                            float parsedPrice = Float.parseFloat(sprice);
+                            DecimalFormat decimalFormat = new DecimalFormat("#.##");
+                            String formattedPrice = decimalFormat.format(parsedPrice);
+                            price = Float.parseFloat(formattedPrice);
+                        } catch (NumberFormatException e) {
+                            // Handle parsing errors if necessary
+                        }
+                    }
+
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MMM/yyyy-HH:mm", Locale.ENGLISH);
+                    LocalDateTime timeOfBooking = LocalDateTime.parse(timeOfBookingString, formatter);
+
+                    Order order = new Order(orderID, paymentStatus, rideID, status, timeOfBooking, userID, price);
+                    orders.add(order);
+                }
+
+                callback.onOrdersReceived(orders);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                // Handle cancellation if needed
+            }
+        });
+    }
 
     public void getRouts(RoutsCallback callback) {
         DatabaseReference ridesRef2 = db.getReference("rides");
@@ -230,7 +276,6 @@ public class FirebaseHandler {
         });
     }
 
-
     public String getUserId(){
         FirebaseUser currentUser = mAuth.getCurrentUser();
         String userId = null;
@@ -256,6 +301,8 @@ public class FirebaseHandler {
                             Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show();
                         }
                     }
+
+
                 });
 
     }
@@ -299,6 +346,15 @@ public class FirebaseHandler {
                         }
                     }
                 });
+    }
+
+    public void addRout(Rout rout2){
+        DatabaseReference usersRef = db.getReference("rides");
+
+        rout = new Rout(rout2.getRideId(), rout2.getStartLocation(),rout2.getDestination(),rout2.getDepartureTime(),rout2.getReservationDeadline(),rout2.getSeatsAvailable(),rout2.getDriverID(),rout2.getStatus());
+
+        String routId = rout2.getDriverID() + rout2.getDestination();
+        usersRef.child(routId).setValue(rout);
     }
 
 

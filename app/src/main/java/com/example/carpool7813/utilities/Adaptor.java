@@ -1,5 +1,6 @@
 package com.example.carpool7813.utilities;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,11 +13,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.carpool7813.R;
 import com.example.carpool7813.fragments.Orderfrag;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 public class Adaptor extends RecyclerView.Adapter<Adaptor.RoutViewHolder> {
     private List<Rout> routs;
     private FragmentManager fragmentManager;
     private boolean isGrid;
+    LocalTime morningRideCutoffTime = LocalTime.of(10, 00);
+    LocalTime afternoonRideCutoffTime = LocalTime.of(13, 00);
+    LocalDateTime rideDateTime;
 
     public Adaptor(List<Rout> routs, FragmentManager fragmentManager, boolean isGrid) {
         this.routs = routs;
@@ -59,26 +65,59 @@ public class Adaptor extends RecyclerView.Adapter<Adaptor.RoutViewHolder> {
         private TextView name;
         private TextView describtion;
         private ImageView image;
+        View background;
 
         public RoutViewHolder(View itemView) {
             super(itemView);
             name = itemView.findViewById(R.id.distName);
             image = itemView.findViewById(R.id.distImage);
             describtion = itemView.findViewById(R.id.distInfo);
+            background = itemView.findViewById(R.id.background);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     int layoutPosition = getLayoutPosition();
                     Rout current = routs.get(layoutPosition);
-                    fragmentManager.beginTransaction().replace(R.id.flFragment, new Orderfrag(current)).addToBackStack(null).commit();
+                    LocalDateTime currentDateTime = LocalDateTime.now();
+
+                    rideDateTime = current.getDepartureTime();
+
+                    if ((rideDateTime.toLocalTime().equals(LocalTime.of(7, 30)) &&
+                            currentDateTime.toLocalTime().isAfter(morningRideCutoffTime))||(rideDateTime.toLocalTime().equals(LocalTime.of(7, 30)) &&currentDateTime.toLocalTime().isBefore(LocalTime.of(7, 30)))) {
+
+                    }
+                    else if (rideDateTime.toLocalTime().equals(LocalTime.of(17, 30)) &&
+                            currentDateTime.toLocalTime().isAfter(afternoonRideCutoffTime)) {
+
+                    }else{
+                        fragmentManager.beginTransaction().replace(R.id.flFragment, new Orderfrag(current)).addToBackStack(null).commit();
+                    }
                 }
             });
         }
 
         public void bind(Rout Rout) {
-            name.setText(Rout.getStartLocation() + '/' + Rout.getDestination());
-            describtion.setText(Rout.getFormattedDepartureTime().toString() + "\n" + "Available Seats: "+Rout.getSeatsAvailable());
+            LocalDateTime currentDateTime = LocalDateTime.now();
+
+            rideDateTime = Rout.getDepartureTime();
+
+            if ((rideDateTime.toLocalTime().equals(LocalTime.of(7, 30)) &&
+                    currentDateTime.toLocalTime().isAfter(morningRideCutoffTime))||(rideDateTime.toLocalTime().equals(LocalTime.of(7, 30)) &&currentDateTime.toLocalTime().isBefore(LocalTime.of(7, 30)))) {
+                name.setText(Rout.getStartLocation() + '/' + Rout.getDestination());
+                describtion.setText(Rout.getFormattedDepartureTime().toString() + "\n" + "TIME PASSED");
+                background.setBackgroundColor(Color.parseColor("#FF401111"));
+            }
+            else if (rideDateTime.toLocalTime().equals(LocalTime.of(17, 30)) &&
+                    currentDateTime.toLocalTime().isAfter(afternoonRideCutoffTime)) {
+                name.setText(Rout.getStartLocation() + '/' + Rout.getDestination());
+                describtion.setText(Rout.getFormattedDepartureTime().toString() + "\n" + "TIME PASSED");
+                background.setBackgroundColor(Color.parseColor("#FF401111"));
+            }else{
+                name.setText(Rout.getStartLocation() + '/' + Rout.getDestination());
+                describtion.setText(Rout.getFormattedDepartureTime().toString() + "\n" + "Available Seats: "+Rout.getSeatsAvailable());
+            }
+
         }
     }
 }

@@ -7,4 +7,5 @@ import com.example.carpool7813.utilities.User;
 
 public interface UserCallback {
     void onCallback(LiveData<userProfile> user);
+    void onSpecialCall(userProfile user);
 }
