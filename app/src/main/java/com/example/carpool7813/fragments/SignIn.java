@@ -2,6 +2,9 @@ package com.example.carpool7813.fragments;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -53,11 +56,17 @@ public class SignIn extends Fragment implements SigninCallback {
         pb.setVisibility(View.VISIBLE);
         FirebaseUser currentUser = mAuth.getCurrentUser();
         authManager = FirebaseHandler.getInstance();
+        SharedPreferences sharedPreferences =  requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+        boolean signedIn = sharedPreferences.getBoolean("signed in", false);
+
         if (currentUser != null) {
             authManager.getUser(this);
+        }else if(signedIn){
+            Toast.makeText(getContext(),"Signed in locally",Toast.LENGTH_LONG).show();
+            rerout();
+        }else {
+            Toast.makeText(getContext(), "Couldnt Sign in locally", Toast.LENGTH_LONG).show();
         }
-        signIn_button.setText("Sign In");
-        pb.setVisibility(View.INVISIBLE);
     }
 
 
@@ -116,12 +125,10 @@ public class SignIn extends Fragment implements SigninCallback {
 
     @Override
     public void onUserReceived(User user) {
+        signIn_button.setText("Sign In");
+        pb.setVisibility(View.INVISIBLE);
         if(user != null){
             addUser(user);
-
-            Toast.makeText(getContext(),"USER NAME IS: "+ user.getName(),Toast.LENGTH_SHORT).show();
-            signIn_button.setText("Sign In");
-            pb.setVisibility(View.INVISIBLE);
             reload();
         }else{
             authManager.getUser(this);
@@ -138,6 +145,14 @@ public class SignIn extends Fragment implements SigninCallback {
         FirebaseUser user = mAuth.getCurrentUser();
         Context context = getActivity();
         user_type = user.getDisplayName();
+        SharedPreferences sharedPreferences =  requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        boolean yourBooleanValue = true;
+        editor.putBoolean("signed in", yourBooleanValue);
+
+        editor.apply();
         Intent intent;
         if (user_type.equals("Client")) {
             intent = new Intent(context, CustomerApp.class);
@@ -153,10 +168,18 @@ public class SignIn extends Fragment implements SigninCallback {
 
     void addUser(User user2) {
         userProfile user = new userProfile(user2.getId(),user2.getName(),user2.getEmail(),user2.getUserType());
-        userViewModel = new ViewModelProvider(this).get(userViewModel.class);
+        userViewModel = userViewModel.getInstance(requireActivity().getApplication());
         userViewModel.insertUser(user);
 
     }
+
+    void rerout(){
+        signIn_button.setText("Sign In");
+        pb.setVisibility(View.INVISIBLE);
+        reload();
+
+    }
+
 
 }
 

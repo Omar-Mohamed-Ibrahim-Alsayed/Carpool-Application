@@ -26,7 +26,7 @@ public abstract class profileDB extends RoomDatabase {
             synchronized (profileDB.class) {
                 if (userRoomDatabase == null) {
                     userRoomDatabase = Room.databaseBuilder(context.getApplicationContext(),
-                                    profileDB.class, "student_database")
+                                    profileDB.class, "user_database")
                             .build();
                 }
             }

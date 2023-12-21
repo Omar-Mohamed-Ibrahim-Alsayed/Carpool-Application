@@ -1,6 +1,7 @@
 package com.example.carpool7813.ViewModel;
 
 import android.app.Application;
+import android.util.Log;
 
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
@@ -15,15 +16,26 @@ import com.google.firebase.database.core.Repo;
 import java.util.List;
 
 public class userViewModel extends AndroidViewModel implements RepoCallBack, UserCallback {
+    private static userViewModel instance;
     private Repository studentRepository;
-    private LiveData<userProfile> user;
+    private static userProfile user;
     UserCallback callback;
     private boolean isFetchingUser = false;
 
-    public userViewModel(Application application) {
+    private userViewModel(Application application) {
         super(application);
+        Log.e("DSAS","creating viewmodel");
         studentRepository = new Repository(application);
+    }
 
+    public static userViewModel getInstance(Application application) {
+        if (instance == null) {
+            instance = new userViewModel(application);
+        }
+        if(user ==null){
+            Log.e("DSAS","NO USER");
+        }
+        return instance;
     }
 
     private void updateUser(){
@@ -33,10 +45,15 @@ public class userViewModel extends AndroidViewModel implements RepoCallBack, Use
 
     public void getStudentFromVm(UserCallback callback) {
         this.callback = callback;
-        if (!isFetchingUser) {
-            isFetchingUser = true;
-            updateUser();
-        } else {
+        if(callback !=null){
+            if(user != null){
+                callback.onSpecialCall(user);
+            }else{
+            if (!isFetchingUser) {
+                isFetchingUser = true;
+                updateUser();
+            } else {
+            }}
         }
     }
 
@@ -51,28 +68,35 @@ public class userViewModel extends AndroidViewModel implements RepoCallBack, Use
 
     @Override
     public void onUserReceived(LiveData<userProfile> user) {
-        this.user = user;
+        this.user = user.getValue();
         callback.onCallback(user);
     }
 
     @Override
     public void onCallback(LiveData<userProfile> user) {
-        this.user = user;
+        this.user = user.getValue();
         if (user != null) {
+            isFetchingUser = false;
             callback.onCallback(user);
         } else {
-            isFetchingUser = false;
-            updateUser();
+            if(!isFetchingUser){
+                isFetchingUser = true;
+                updateUser();
+            }
         }
     }
 
     @Override
     public void onSpecialCall(userProfile user) {
+        this.user = user;
         if (user != null) {
+            isFetchingUser = false;
             callback.onSpecialCall(user);
         } else {
-            isFetchingUser = false;
+            if(!isFetchingUser){
+            isFetchingUser = true;
             updateUser();
+            }
         }
     }
 }

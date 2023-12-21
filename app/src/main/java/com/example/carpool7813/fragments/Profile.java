@@ -42,11 +42,12 @@ public class Profile extends Fragment implements UserCallback {
     ProgressBar pb;
     FirebaseHandler fb;
     User user;
-    userViewModel userViewModel;
+    userViewModel userViewModel1;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        userViewModel1 = userViewModel.getInstance(requireActivity().getApplication());
     }
 
 
@@ -55,7 +56,7 @@ public class Profile extends Fragment implements UserCallback {
         super.onStart();
         pb.setVisibility(View.VISIBLE);
         fb = FirebaseHandler.getInstance();
-        userViewModel = new ViewModelProvider(this).get(userViewModel.class);
+
         //fb.getUser(this);
         getUser();
     }
@@ -76,7 +77,16 @@ public class Profile extends Fragment implements UserCallback {
         sign_out_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                userViewModel.deleteAll();
+                userViewModel1.deleteAll();
+                SharedPreferences sharedPreferences =  requireActivity().getSharedPreferences("MyPrefs", Context.MODE_PRIVATE);
+
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+
+                boolean yourBooleanValue = false;
+                editor.putBoolean("signed in", yourBooleanValue);
+
+                editor.apply();
+
                 FirebaseAuth.getInstance().signOut();
                 if (getActivity() != null) {
                     getActivity().finish();
@@ -112,7 +122,7 @@ public class Profile extends Fragment implements UserCallback {
     }
 
     void getUser() {
-        userViewModel.getStudentFromVm(this);
+        userViewModel1.getStudentFromVm(this);
     }
 
     @Override
@@ -122,6 +132,8 @@ public class Profile extends Fragment implements UserCallback {
 
     @Override
     public void onSpecialCall(userProfile userProfile) {
+        Toast.makeText(getContext(),"recieved user",Toast.LENGTH_LONG).show();
+
         if (userProfile != null) {
             welcome_tx.setText(getString(R.string.profile_title) + " " + userProfile.getName());
             mail_tx.setText(userProfile.getEmail());

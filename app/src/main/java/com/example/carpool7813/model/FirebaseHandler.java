@@ -24,8 +24,11 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.FirebaseNetworkException;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
+import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.database.DataSnapshot;
@@ -298,13 +301,22 @@ public class FirebaseHandler {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            Toast.makeText(context, "Success", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(context, "Welcome back!", Toast.LENGTH_SHORT).show();
                             FirebaseUser currentUser = mAuth.getCurrentUser();
                             if (currentUser != null) {
                                 user = new User(currentUser.getUid(), currentUser.getDisplayName(), currentUser.getEmail(),"");
                             }
                         } else {
-                            Toast.makeText(context, "Failed", Toast.LENGTH_SHORT).show();
+                            Exception exception = task.getException();
+                            if (exception instanceof FirebaseAuthInvalidUserException) {
+                                Toast.makeText(context, "Invalid email address", Toast.LENGTH_SHORT).show();
+                            } else if (exception instanceof FirebaseAuthInvalidCredentialsException) {
+                                Toast.makeText(context, "Invalid mail or password", Toast.LENGTH_SHORT).show();
+                            } else if (exception instanceof FirebaseNetworkException) {
+                                Toast.makeText(context, "No internet connection", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(context, "Login failed: " + exception.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
                         }
                     }
 

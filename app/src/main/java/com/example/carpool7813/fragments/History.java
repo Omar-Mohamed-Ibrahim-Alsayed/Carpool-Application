@@ -16,7 +16,6 @@ import android.widget.TextView;
 import com.example.carpool7813.R;
 import com.example.carpool7813.interfaces.OrdersCallback;
 import com.example.carpool7813.model.FirebaseHandler;
-import com.example.carpool7813.utilities.CartAdaptor;
 import com.example.carpool7813.utilities.HistoryAdaptor;
 import com.example.carpool7813.utilities.Order;
 
@@ -33,7 +32,7 @@ public class History extends Fragment implements OrdersCallback {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_cart, container, false);
+        View view = inflater.inflate(R.layout.fragment_history, container, false);
 
         pb = view.findViewById(R.id.progressBar);
         recycler = view.findViewById(R.id.rview);

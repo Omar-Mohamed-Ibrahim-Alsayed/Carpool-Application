@@ -55,7 +55,6 @@ public class Repository implements SigninCallback {
 
     public void insertUser(userProfile u) {
         profileDB.databaseWriteExecutor.execute(() -> userDao.deleteAll());
-        Log.e("USER NAME IS","USER TO ADD HAS NAME: "+u.getName() );
         profileDB.databaseWriteExecutor.execute(() -> userDao.insert(u));
     }
 
@@ -68,6 +67,9 @@ public class Repository implements SigninCallback {
             if (user != null) {
                 userProfile userProfile = user.getValue();
                 if (userProfile != null) {
+                    Log.e("USER NAME IS","User returned from room" );
+
+                    isFetchingUser = false;
                     insertUser(userProfile);
                     callback.onCallback(user);
                 }else{
@@ -81,10 +83,11 @@ public class Repository implements SigninCallback {
                     }
             }
         }else{
-            Log.e("USER NAME IS","TRYING AGAIN" );
-
-            isFetchingUser = true;
-            fb.getUser(this);
+            if (!isFetchingUser) {
+                Log.e("USER NAME IS","TRYING AGAIN" );
+                isFetchingUser = true;
+                fb.getUser(this);
+            }
         }
 
     }
@@ -105,10 +108,8 @@ public class Repository implements SigninCallback {
                 @Override
                 public void onChanged(userProfile userProfile) {
                     if (userProfile != null) {
+                        isFetchingUser = false;
                         Log.e("USER NAME IS", "User inserted to room: " + userProfile.getEmail());
-
-
-
                         callback.onSpecialCall(userProfile);
                     } else {
                         Log.e("USER NAME IS", "User is not returned to profile");
@@ -116,9 +117,12 @@ public class Repository implements SigninCallback {
                 }
             });
         } else {
-            Log.e("USER NAME IS", "TRYING AGAIN");
-            isFetchingUser = false;
-            fb.getUser(this);
+            if (!isFetchingUser) {
+                Log.e("USER NAME IS","TRYING AGAIN" );
+
+                isFetchingUser = true;
+                fb.getUser(this);
+            }
         }
     }
 

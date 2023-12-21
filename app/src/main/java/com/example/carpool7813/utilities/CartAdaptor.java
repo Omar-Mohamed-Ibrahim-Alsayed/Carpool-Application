@@ -80,7 +80,7 @@ public class CartAdaptor extends RecyclerView.Adapter<CartAdaptor.OrderViewModel
         }
 
         public void bind(Order order) {
-            name.setText(order.getOrderID());
+            name.setText("Order ID: " + order.getOrderID());
             status.setText(order.getStatus());
             date.setText(order.getTimeOfBooking().toString() );
             DecimalFormat decimalFormat = new DecimalFormat("#.##");
